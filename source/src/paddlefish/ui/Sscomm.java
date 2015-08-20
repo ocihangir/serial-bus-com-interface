@@ -4,7 +4,9 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Formatter;
 
@@ -35,6 +37,7 @@ public class Sscomm {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
+					System.setOut(new PrintStream(new FileOutputStream("output.txt")));
 					commCont = CommController.getInstance();
 					Sscomm window = new Sscomm();
 					window.frame.setVisible(true);
@@ -130,6 +133,14 @@ public class Sscomm {
 		scrList.setBounds(350, 45, 267, 415);
 		frame.getContentPane().add(scrList);
 		
+		JLabel lblStat = new JLabel("Status:");
+		lblStat.setBounds(5, 470, 90, 15);
+		frame.getContentPane().add(lblStat);
+		
+		JLabel lblShowStat = new JLabel("OK");
+		lblShowStat.setBounds(60, 470, 580, 15);
+		frame.getContentPane().add(lblShowStat);
+		
 		JButton btnWrite = new JButton("Write");
 		btnWrite.setBounds(185, 435, 117, 25);
 		frame.getContentPane().add(btnWrite);			
@@ -214,6 +225,8 @@ public class Sscomm {
 		// TODO : accept 0xFFF format				
 		if ( str.length() > 2 )
 			throw (new Exception("Hex number must be in FF format!"));
+		
+		str = str.toUpperCase();
 		
 		byte res = 0;
 		
