@@ -139,12 +139,16 @@ public class Sscomm {
 			public void actionPerformed(ActionEvent event) {
 				
 				try {
-					byte data[] = new byte[] {(byte) str2hex(txtData.getText())};
-					commCont.writeByteArray(str2hex(txtI2C.getText()), str2hex(txtReg.getText()), 1, data);
+					String[] splitData = txtData.getText().split(" ");
+					byte data[] = new byte[splitData.length];
+					for (int i=0;i<splitData.length;i++)
+						data[i] = (byte) str2hex(splitData[i]);
+					commCont.writeByteArray(str2hex(txtI2C.getText()), str2hex(txtReg.getText()), data.length, data);
+					flowModel.addElement(txtI2C.getText() + "  |  " + txtReg.getText() + "   |  " + data.length + "    |  >  | " + txtData.getText());
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				flowModel.addElement(txtI2C.getText() + "  |  " + txtReg.getText() + "   |   1    |  >  | " + txtData.getText());
+				
 			}
 	    });
 		
@@ -158,9 +162,9 @@ public class Sscomm {
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				try {
-					
-					byte data[] = commCont.readByteArray(str2hex(txtI2C.getText()), str2hex(txtReg.getText()), 1);
-					flowModel.addElement(txtI2C.getText() + "  |  " + txtReg.getText() + "   |   1    |  <  | " + hex2str(data));
+					int len = Integer.parseInt(txtLength.getText());
+					byte data[] = commCont.readByteArray(str2hex(txtI2C.getText()), str2hex(txtReg.getText()), len);
+					flowModel.addElement(txtI2C.getText() + "  |  " + txtReg.getText() + "   |   " + len + "   |  <  | " + hex2str(data));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -198,7 +202,7 @@ public class Sscomm {
 		Formatter formatter = new Formatter(stringBuild);
 		// Get rid of start and end characters of the answer
 		for ( int i = 1; i<data.length-1; i++ )		
-			formatter.format("%02x", data[i]);
+			formatter.format("%02x ", data[i]);
 		
 		formatter.close();
 				
