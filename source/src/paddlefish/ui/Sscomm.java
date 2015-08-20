@@ -1,5 +1,6 @@
 package paddlefish.ui;
 
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,10 +15,12 @@ import paddlefish.protocol.CommController;
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
 import javax.swing.JButton;
+import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.xml.crypto.Data;
+import javax.swing.JTextArea;
 
 public class Sscomm {
 
@@ -54,54 +57,82 @@ public class Sscomm {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 800, 600);
+		frame.setBounds(100, 100, 650, 515);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
+		JLabel lblComPort = new JLabel("COM Port :");
+		lblComPort.setBounds(30, 25, 117, 15);
+		frame.getContentPane().add(lblComPort);
+		
 		final JComboBox<String> comboBox = new JComboBox<String>();
-		comboBox.setBounds(69, 74, 141, 24);
+		comboBox.setBounds(30, 45, 150, 24);
 		frame.getContentPane().add(comboBox);
 		
 		listPortsToComboBox(comboBox);
 		
 		btnConnect = new JButton("Connect");
-		btnConnect.setBounds(69, 135, 117, 25);
+		btnConnect.setBounds(185, 45, 117, 25);
 		frame.getContentPane().add(btnConnect);
 		
-		final JTextPane txtI2C = new JTextPane();
-		txtI2C.setBounds(69, 228, 98, 21);
-		frame.getContentPane().add(txtI2C);
-		
 		JLabel lblIcAddress = new JLabel("I2C Address :");
-		lblIcAddress.setBounds(69, 201, 117, 15);
+		lblIcAddress.setBounds(30, 85, 117, 15);
 		frame.getContentPane().add(lblIcAddress);
 		
+		final JTextPane txtI2C = new JTextPane();
+		txtI2C.setBounds(30, 105, 98, 21);
+		frame.getContentPane().add(txtI2C);		
+		
 		JLabel lblRegisterAddress = new JLabel("Register Address :");
-		lblRegisterAddress.setBounds(69, 276, 141, 15);
+		lblRegisterAddress.setBounds(30, 145, 141, 15);
 		frame.getContentPane().add(lblRegisterAddress);
 		
 		final JTextPane txtReg = new JTextPane();
-		txtReg.setBounds(69, 303, 98, 21);
+		txtReg.setBounds(30, 165, 98, 21);
 		frame.getContentPane().add(txtReg);
 		
-		JLabel lblData = new JLabel("Data :");
-		lblData.setBounds(69, 349, 141, 15);
-		frame.getContentPane().add(lblData);
+		JLabel lblLength = new JLabel("Data Length :");
+		lblLength.setBounds(30, 205, 141, 15);
+		frame.getContentPane().add(lblLength);
 		
-		final JTextPane txtData = new JTextPane();
-		txtData.setBounds(69, 376, 98, 21);
-		frame.getContentPane().add(txtData);		
+		final JTextPane txtLength = new JTextPane();
+		txtLength.setBounds(30, 225, 98, 21);
+		frame.getContentPane().add(txtLength);
+		
+		JLabel lblData = new JLabel("Data :");
+		lblData.setBounds(30, 265, 141, 15);
+		frame.getContentPane().add(lblData);		
+		
+		final JTextArea txtData = new JTextArea();
+		txtData.setBounds(30, 285, 300, 130);		
+		txtData.setLineWrap(true);
+		txtData.setWrapStyleWord(true);		
+		frame.getContentPane().add(txtData);
+		
+		JScrollPane scrData = new JScrollPane(txtData);
+		scrData.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		scrData.setPreferredSize(new Dimension(250, 250));
+		scrData.setBounds(30, 285, 300, 130);
+		frame.getContentPane().add(scrData);	
+		
+		JLabel lblList = new JLabel("I2C | Reg | Len | Dir | Data");
+		lblList.setBounds(350, 25, 267, 15);
+		frame.getContentPane().add(lblList);
 		
 		final DefaultListModel<String> flowModel = new DefaultListModel<String>();  
 		JList<String> lstFlow = new JList<String>(flowModel);
-		lstFlow.setBounds(385, 74, 267, 438);
+		lstFlow.setBounds(350, 45, 267, 415);
 		frame.getContentPane().add(lstFlow);
 		
-		flowModel.addElement("I2C | Reg | Len | Dir | Data");
+		JScrollPane scrList = new JScrollPane(lstFlow);
+		scrList.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		scrList.setPreferredSize(new Dimension(250, 250));
+		scrList.setBounds(350, 45, 267, 415);
+		frame.getContentPane().add(scrList);
 		
 		JButton btnWrite = new JButton("Write");
-		btnWrite.setBounds(69, 409, 117, 25);
-		frame.getContentPane().add(btnWrite);
+		btnWrite.setBounds(185, 435, 117, 25);
+		frame.getContentPane().add(btnWrite);			
 		
 		btnWrite.addActionListener(new ActionListener(){
 			@Override
@@ -111,7 +142,6 @@ public class Sscomm {
 					byte data[] = new byte[] {(byte) str2hex(txtData.getText())};
 					commCont.writeByteArray(str2hex(txtI2C.getText()), str2hex(txtReg.getText()), 1, data);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				flowModel.addElement(txtI2C.getText() + "  |  " + txtReg.getText() + "   |   1    |  >  | " + txtData.getText());
@@ -119,9 +149,11 @@ public class Sscomm {
 	    });
 		
 		JButton btnRead = new JButton("Read");
-		btnRead.setBounds(69, 446, 117, 25);
+		btnRead.setBounds(30, 435, 117, 25);
 		frame.getContentPane().add(btnRead);
 		
+		
+				
 		btnRead.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent event) {
@@ -130,7 +162,6 @@ public class Sscomm {
 					byte data[] = commCont.readByteArray(str2hex(txtI2C.getText()), str2hex(txtReg.getText()), 1);
 					flowModel.addElement(txtI2C.getText() + "  |  " + txtReg.getText() + "   |   1    |  <  | " + hex2str(data));
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				
@@ -168,6 +199,8 @@ public class Sscomm {
 		// Get rid of start and end characters of the answer
 		for ( int i = 1; i<data.length-1; i++ )		
 			formatter.format("%02x", data[i]);
+		
+		formatter.close();
 				
 		return stringBuild.toString().toUpperCase();
 	}
@@ -221,5 +254,4 @@ public class Sscomm {
 		
 		return res;
 	}
-	
 }
