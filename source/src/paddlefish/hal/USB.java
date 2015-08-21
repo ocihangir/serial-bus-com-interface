@@ -1,29 +1,20 @@
 package paddlefish.hal;
 
-// Code in this class was taken from : 
-// http://eclipsesource.com/blogs/2012/10/17/serial-communication-in-java-with-raspberry-pi-and-rxtx/
-
-import gnu.io.CommPort;
-import gnu.io.CommPortIdentifier;
-import gnu.io.PortInUseException;
-import gnu.io.SerialPort;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Enumeration; 
-
-import paddlefish.hal.SerialPortList;
+import jssc.SerialPort;
+import jssc.SerialPortException;
+import jssc.SerialPortList;
+import jssc.SerialPortTimeoutException;
 
 public class USB
 {
 	InputStream in;
 	OutputStream out;
 
-	CommPort commPort;
-	SerialPortList serialPorts;
-	
-	private boolean connected = false;
+	SerialPort commPort;
+	SerialPortList serialPorts;	
 	
 	public USB() throws Exception
 	{	
@@ -33,69 +24,45 @@ public class USB
 	
 	public boolean isConnected()
 	{
-		return connected;
+		if ( commPort == null)
+			return false;
+		
+		return commPort.isOpened();
 	}
 	
 	/*
 	 * Connect to the serial port and hold it
 	 */
-	void connect( String portName, int baudRate ) throws Exception 
+	void connect( String portName, int baudRate ) throws SerialPortException 
 	{
-		System.setProperty("gnu.io.rxtx.SerialPorts", portName); // A hack for rxtx cannot find ttyACMx ports on linux. See https://bugs.launchpad.net/ubuntu/+source/rxtx/+bug/367833
-	    CommPortIdentifier portIdentifier = CommPortIdentifier
-	        .getPortIdentifier( portName );
-	    if( portIdentifier.isCurrentlyOwned() ) 
-	    {
-	      System.out.println( "Error: Port is currently in use" );
-	    } 
-	    else 
-	    {
-	      int timeout = 2000;
-	      commPort = portIdentifier.open( this.getClass().getName(), timeout );
-	 
-	      if( commPort instanceof SerialPort ) 
-	      {
-	        SerialPort serialPort = ( SerialPort )commPort;
-	        serialPort.setSerialPortParams( baudRate,
-	                                        SerialPort.DATABITS_8,
-	                                        SerialPort.STOPBITS_1,
-	                                        SerialPort.PARITY_NONE );
-	 
-	        in = serialPort.getInputStream();
-	        out = serialPort.getOutputStream();
-	        connected = true;
-	      }
-	      else 
-	      {
-	        System.out.println( "Error: Only serial ports are handled by this example." );
-	      }
-	    }
-	  }
-	
-	public void disconnect()
-	{
-		connected = false;
-		commPort.close();
+		commPort = new SerialPort(portName);
+		commPort.openPort();
+		commPort.setParams(baudRate, 8, 1, 0);
 	}
 	
-	public void close()
+	public void disconnect() throws SerialPortException
+	{
+		commPort.closePort();
+	}
+	
+	public void close() throws SerialPortException
 	{
 		if(this.commPort!=null)
-			this.commPort.close();
+			commPort.closePort();
 		//TODO: Log
 		else
 			System.out.println("No CommPort available");
 	}
 	
-	public void sendData(byte[] data) throws IOException
+	public void sendData(byte[] data) throws SerialPortException
 	{
 		byte buffer[] = new byte[data.length];
 		for (int i=0;i<data.length;i++)
 			buffer[i] = (byte) data[i];
-		this.out.write(buffer);
+		commPort.writeBytes(buffer);
 	}
 	
-	public byte[] receiveData() throws IOException
+	public byte[] receiveData() throws SerialPortException, SerialPortTimeoutException
 	{
 		byte[] resBuffer = new byte[1024];
 		byte[] buffer = new byte[1024];
@@ -104,7 +71,9 @@ public class USB
 		boolean loop = true;
 		do 
 		{
-			len = this.in.read( buffer );
+			len = commPort.getInputBufferBytesCount();
+			buffer = commPort.readBytes(len,2000);
+			
 			System.arraycopy(buffer, 0, resBuffer, prev_len, len);
 			prev_len+=len;
 			
@@ -121,66 +90,6 @@ public class USB
 		return res;
 	}
 	
-	public static class SerialReader implements Runnable {
-		 
-	    InputStream in;
-	 
-	    public SerialReader( InputStream in ) {
-	      this.in = in;
-	    }
-	 
-	    public void run() {
-	      byte[] buffer = new byte[ 1024 ];
-	      int len = -1;
-	      try {
-	        while( ( len = this.in.read( buffer ) ) > -1 ) {
-	          System.out.print( new String( buffer, 0, len ) );
-	        }
-	      } catch( IOException e ) {
-	        e.printStackTrace();
-	      }
-	    }
-	  }
-	 
-	  public static class SerialWriter implements Runnable {
-	 
-	    OutputStream out;
-	 
-	    public SerialWriter( OutputStream out ) {
-	      this.out = out;
-	    }
-	 
-	    public void run() {
-	      try {
-	        int c = 0;
-	        while( ( c = System.in.read() ) > -1 ) {
-	          this.out.write( c );
-	        }
-	      } catch( IOException e ) {
-	        e.printStackTrace();
-	      }
-	    }
-	  }
-	  
-	  private static String getPortTypeName ( int portType )
-	    {
-	        switch ( portType )
-	        {
-	        case CommPortIdentifier.PORT_I2C:
-	            return "I2C";
-	        case CommPortIdentifier.PORT_PARALLEL:
-	            return "Parallel";
-	        case CommPortIdentifier.PORT_RAW:
-	            return "Raw";
-	        case CommPortIdentifier.PORT_RS485:
-	            return "RS485";
-	        case CommPortIdentifier.PORT_SERIAL:
-	            return "Serial";
-	        default:
-	            return "unknown type";
-	        }
-	    }
-	  
 	  public ArrayList<String> listPorts()
 	    {
 		  

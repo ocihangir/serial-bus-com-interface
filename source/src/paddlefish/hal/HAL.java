@@ -3,6 +3,9 @@ package paddlefish.hal;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import jssc.SerialPortException;
+import jssc.SerialPortTimeoutException;
+
 
 public class HAL {
 	USB usbComm;
@@ -36,7 +39,12 @@ public class HAL {
 	
 	public void disconnect()
 	{
-		usbComm.disconnect();
+		try {
+			usbComm.disconnect();
+		} catch (SerialPortException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public boolean isConnected()
@@ -46,10 +54,15 @@ public class HAL {
 	
 	public void txData(byte data[]) throws IOException
 	{
-		usbComm.sendData(data);
+		try {
+			usbComm.sendData(data);
+		} catch (SerialPortException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
-	public byte[] rxData() throws IOException
+	public byte[] rxData() throws IOException, SerialPortException, SerialPortTimeoutException
 	{		
 		return usbComm.receiveData();
 	}
@@ -57,8 +70,12 @@ public class HAL {
 	public void close()
 	{
 		if(this.usbComm!=null)
-			this.usbComm.close();
-		//TODO: Log
+			try {
+				this.usbComm.close();
+			} catch (SerialPortException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		else
 			System.out.println("No UsbComm available");
 	}

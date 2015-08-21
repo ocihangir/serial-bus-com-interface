@@ -3,6 +3,9 @@ package paddlefish.protocol;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import jssc.SerialPortException;
+import jssc.SerialPortTimeoutException;
+
 import paddlefish.hal.HAL;
 import paddlefish.protocol.CommConstants;
 
@@ -51,7 +54,7 @@ public class CommController
     	hal.disconnect();
     }
     
-	public byte[] readByteArray(byte deviceAddress, byte registerAddress, int length) throws IOException, InterruptedException
+	public byte[] readByteArray(byte deviceAddress, byte registerAddress, int length) throws IOException, InterruptedException, SerialPortException, SerialPortTimeoutException
 	{
 		byte cmd[] = new byte[7];
 		
@@ -71,7 +74,7 @@ public class CommController
 		return receivedData;
 	}
 	
-	public boolean writeSingleByte(byte deviceAddress, byte registerAddress, byte data) throws IOException
+	public boolean writeSingleByte(byte deviceAddress, byte registerAddress, byte data) throws IOException, SerialPortException, SerialPortTimeoutException
 	{
 		byte cmd[] = new byte[8];
 		
@@ -91,7 +94,7 @@ public class CommController
 		return checkOK(receivedData);
 	}
 	
-	public boolean writeByteArray(byte deviceAddress, byte registerAddress, int length, byte data[]) throws IOException
+	public boolean writeByteArray(byte deviceAddress, byte registerAddress, int length, byte data[]) throws IOException, SerialPortException, SerialPortTimeoutException
 	{
 		byte cmd[] = new byte[8+length];
 		
@@ -112,7 +115,7 @@ public class CommController
 		return checkOK(receivedData);
 	}
 	
-	public boolean writeBits(byte deviceAddress, byte registerAddress, byte data, byte mask) throws IOException, InterruptedException
+	public boolean writeBits(byte deviceAddress, byte registerAddress, byte data, byte mask) throws IOException, InterruptedException, SerialPortException, SerialPortTimeoutException
 	{
 		byte cmd[] = new byte[8];
 		
@@ -134,7 +137,7 @@ public class CommController
 	}
 	
 	
-	public boolean addDevice(byte deviceAddress, byte registerAddress, byte length, int period) throws IOException, InterruptedException
+	public boolean addDevice(byte deviceAddress, byte registerAddress, byte length, int period) throws IOException, InterruptedException, SerialPortException, SerialPortTimeoutException
 	{
 		byte cmd[] = new byte[9];
 		
@@ -156,7 +159,7 @@ public class CommController
 		return checkOK(receivedData);
 	}
 	
-	public boolean setPeriod(int period) throws IOException, InterruptedException
+	public boolean setPeriod(int period) throws IOException, InterruptedException, SerialPortException, SerialPortTimeoutException
 	{
 		byte cmd[] = new byte[6];
 		
@@ -175,7 +178,7 @@ public class CommController
 		return checkOK(receivedData);
 	}
 	
-	public boolean start() throws IOException, InterruptedException
+	public boolean start() throws IOException, InterruptedException, SerialPortException, SerialPortTimeoutException
 	{
 		byte cmd[] = new byte[5];
 		
@@ -193,7 +196,7 @@ public class CommController
 		return checkOK(receivedData);
 	}
 	
-	public boolean stop() throws IOException, InterruptedException
+	public boolean stop() throws IOException, InterruptedException, SerialPortException, SerialPortTimeoutException
 	{
 		byte cmd[] = new byte[5];
 		
@@ -211,7 +214,7 @@ public class CommController
 		return checkOK(receivedData);
 	}
 	
-	public boolean reset() throws IOException, InterruptedException
+	public boolean reset() throws IOException, InterruptedException, SerialPortException, SerialPortTimeoutException
 	{
 		byte cmd[] = new byte[4];
 		

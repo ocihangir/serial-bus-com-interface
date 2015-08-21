@@ -37,7 +37,7 @@ public class Sscomm {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					System.setOut(new PrintStream(new FileOutputStream("output.txt")));
+					//System.setOut(new PrintStream(new FileOutputStream("output.txt")));
 					commCont = CommController.getInstance();
 					Sscomm window = new Sscomm();
 					window.frame.setVisible(true);
