@@ -24,7 +24,7 @@ import javax.swing.JList;
 import javax.xml.crypto.Data;
 import javax.swing.JTextArea;
 
-public class Sscomm {
+public class Sbuscom {
 
 	private JFrame frame;
 	private JButton btnConnect;
@@ -39,7 +39,7 @@ public class Sscomm {
 				try {
 					//System.setOut(new PrintStream(new FileOutputStream("output.txt")));
 					commCont = CommController.getInstance();
-					Sscomm window = new Sscomm();
+					Sbuscom window = new Sbuscom();
 					window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -51,7 +51,7 @@ public class Sscomm {
 	/**
 	 * Create the application.
 	 */
-	public Sscomm() {
+	public Sbuscom() {
 		initialize();
 	}
 
