@@ -1,8 +1,8 @@
-# simple-serial-communicator
+# serial-bus-com-interface
 
-simple-serial-communicator (sscomm) is created to access and test I2C devices in a simple way. It consists of two parts; a Java UI application and an Arduino sketch. Please see project Wiki for details.
+serial-bus-com-interface (sbuscom) is created to access and test I2C devices in a simple way. It consists of two parts; a Java UI application and an Arduino sketch. Please see project Wiki for details.
 
-sscomm project is a side project of project PaddleFish. PaddleFish is designed to facilitate the data acquisition part of IoT and Wearables. Project PaddleFish has an Arduino hardware which has BLE connection and a mobile application to collect sensor data. It also has preconfigured sensor information for variety of sensors. You can connect many sensors at once and start to collect periodic data via mobile phone. It will be open source very soon.
+sbuscom project is a side project of project PaddleFish. PaddleFish is designed to facilitate the data acquisition part of IoT and Wearables. Project PaddleFish has an Arduino hardware which has BLE connection and a mobile application to collect sensor data. It also has preconfigured sensor information for variety of sensors. You can connect many sensors at once and start to collect periodic data via mobile phone. It will be open source very soon.
 
 ##How it works?
 
