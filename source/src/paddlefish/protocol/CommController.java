@@ -22,6 +22,9 @@ public class CommController
 		//http://www.javaworld.com/article/2073352/core-java/simply-singleton.html
 		 if(hal==null)
 			hal = new HAL();
+		 // TODO : implement CRC
+		 // TODO : timeout control needed
+		 // TODO : create a thread for serial read and write
 	}
 	   
 
