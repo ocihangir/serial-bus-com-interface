@@ -1,17 +1,11 @@
 /* Paddlefish */
 
 #include "TimerOne.h"
+#include "LWI2C.h"
 
 //#define LEONARDO 1
 
 #define BAUDRATE 115200
-
-// I2C related constants
-#define START_CONDITION 0x00
-#define SEND_CONDITION 0x01
-#define SEND_CONDITION_NACK 0x02
-#define STOP_CONDITION 0x03
-#define REPEATED_START_CONDITION 0x04
 
 // ** Communication related constants **
 // i2c
@@ -37,6 +31,7 @@
 #define MAX_DEV 20 // max number of devices to stream/dump
 #define STREAM_LENGTH 5 // i2cadd[1]+regadd[1]+len[1]+period[2]
 
+LWI2C lwi2c;
 
 int ledb = 13;
 int blinkCounter = 0;
@@ -70,7 +65,7 @@ void setup()
   Timer1.attachInterrupt(heartBeat);
   Timer1.stop();
   
-  TWBR = 0x1F; // TODO : i2c speed slowed down to below 400KHz for eeprom
+  lwi2c.i2c_set_speed(0x1F); // TODO : i2c speed slowed down to below 400KHz for eeprom
   
   streamCmdArray[0] = 0; // number of stream devices is zero
   
@@ -355,11 +350,11 @@ char* pfReadBytes(char devAddress, char regAddress, char length)
 {
   char sendData[1];
   sendData[0]=regAddress;
-  i2c_start();
-  i2c_write(devAddress,1,(char*)sendData);
-  i2c_repeated_start();
-  char* receiveBuffer = i2c_read(devAddress,length);
-  i2c_stop();
+  lwi2c.i2c_start();
+  lwi2c.i2c_write(devAddress,1,(char*)sendData);
+  lwi2c.i2c_repeated_start();
+  char* receiveBuffer = lwi2c.i2c_read(devAddress,length);
+  lwi2c.i2c_stop();
   
   return receiveBuffer;
 }
@@ -372,113 +367,9 @@ void pfWriteBytes(char devAddress, char regAddress, char length, char* data)
   {
     sendData[charCount+1]=data[charCount];
   }
-  i2c_start();
-  i2c_write(devAddress,length+1,(char*)sendData);
-  i2c_stop();
-}
-
-char* i2c_read(char devAddress,char length)
-{
-  static char receiveBuffer[16];
-  // slave address to be written
-  char SLA_R = (devAddress << 1) | 1;
-    
-  // send address
-  TWDR = SLA_R; 
-  if (i2c_tx(SEND_CONDITION) != 0x40)
-    i2cError();
-  
-  for(int dataCount=0;dataCount<length;dataCount++)
-  {
-    if ((dataCount!=length-1))
-    {
-      if (i2c_tx(SEND_CONDITION) != 0x50)
-        i2cError();
-    } else {
-      if (i2c_tx(SEND_CONDITION_NACK) != 0x58)
-        i2cError();
-    }
-    receiveBuffer[dataCount] = TWDR;
-  }
-  
-  return receiveBuffer;
-}
-
-void i2c_write(char devAddress, char length, char* data)
-{
-  // slave address to be read
-  char SLA_W = (devAddress << 1);
-    
-  // send address
-  TWDR = SLA_W; 
-  if (i2c_tx(SEND_CONDITION) != 0x18)
-    i2cError();
-    
-  for (int dataCount = 0; dataCount<length; dataCount++)
-  {
-    TWDR = data[dataCount];
-    if (i2c_tx(SEND_CONDITION) != 0x28)
-      i2cError();
-  }
-}
-
-void i2c_start()
-{
-  // start I2C
-  if (i2c_tx(START_CONDITION) != 0x08)
-    i2cError();
-}
-
-void i2c_stop()
-{
-  i2c_tx(STOP_CONDITION);
-}
-
-void i2c_repeated_start()
-{
-  if (i2c_tx(REPEATED_START_CONDITION) != 0x10)
-    i2cError();
-}
-
-
-/*
-* Transmit I2C command
-* Communication start with START_CONDITION
-* SEND_CONDITION transmits command following with an ACK
-* SEND_CONDITION_NACK transmits command following with a NACK
-* STOP_CONDITION stops the communication and releases I2C line
-* REPEATED_START_CONDITION starts another communication without
-* stoping the current one. It is required to read I2C device. Master
-* writes to the device address and register address first. Then,
-* after REPEATED_START_CONDITION, it listens the device.
-*/
-char i2c_tx(char mode)
-{
-  //TWCR: TWINT|TWEA|TWSTA|TWSTO|TWWC|TWEN|-|TWIE
-  delay(0); // TODO: if this line is removed, the code won't work!!
-  switch(mode)
-  {
-    case START_CONDITION:
-      TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);
-      break;
-    case SEND_CONDITION:
-      TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWEA);
-      break;
-    case SEND_CONDITION_NACK:
-      TWCR = (1<<TWINT) | (1<<TWEN);
-      break;
-    case STOP_CONDITION:
-      TWCR = (1<<TWINT) | (0<<TWSTA) | (1<<TWSTO) | (1<<TWEN);
-      break;
-    case REPEATED_START_CONDITION:
-      TWCR = (1<<TWINT) | (1<<TWSTA) | (0<<TWSTO) | (1<<TWEN);
-      break;
-  }   
-  
-  if ((mode != STOP_CONDITION))
-    while (!(TWCR & (1<<TWINT)));// wait for command complete
-    
-  return (TWSR & 0xF8);
+  lwi2c.i2c_start();
+  lwi2c.i2c_write(devAddress,length+1,(char*)sendData);
+  lwi2c.i2c_stop();
 }
 
 /*
@@ -496,11 +387,6 @@ void blinkLed()
   }
   
   blinkCounter++;
-}
-
-void i2cError()
-{
-  digitalWrite( ledb, HIGH );
 }
 
 void commError()
