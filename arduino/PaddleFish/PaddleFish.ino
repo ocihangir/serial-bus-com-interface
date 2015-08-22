@@ -12,6 +12,7 @@
 #define CMD_READ_BYTES 0xC0
 #define CMD_WRITE_BYTES 0xC1
 #define CMD_WRITE_BITS 0xC2
+#define CMD_SET_I2C_SPEED 0XC3
 // stream
 #define CMD_STREAM_ON 0xB0
 #define CMD_STREAM_ADD 0xB1
@@ -65,7 +66,7 @@ void setup()
   Timer1.attachInterrupt(heartBeat);
   Timer1.stop();
   
-  lwi2c.i2c_set_speed(0x1F); // TODO : i2c speed slowed down to below 400KHz for eeprom
+  lwi2c.i2c_set_speed(300000); // TODO : i2c speed slowed down to below 400KHz for eeprom
   
   streamCmdArray[0] = 0; // number of stream devices is zero
   
@@ -144,6 +145,22 @@ void pfControl()
       else {
         switch (receivedCmd)
         {
+          case CMD_SET_I2C_SPEED: /* |START|Cmd|Speed[4]|CRC|End| */ 
+            if (Serial.available() > 1)
+            {
+              char buffer[6];
+              if (receiveBytes(6,buffer))
+              {
+                unsigned long i2c_speed = buffer[0]<<24 | buffer[1]<<16 | buffer[2]<<8 | buffer[3];
+                lwi2c.i2c_set_speed(i2c_speed);
+                
+                commOK();
+                startReceive = false;
+                receivedCmd = CMD_NULL;
+              } else 
+                commError();
+            }
+            break;
           case CMD_STREAM_ON: /* |START|Cmd|On|CRC|End| */ 
             if (Serial.available() > 1)
             {

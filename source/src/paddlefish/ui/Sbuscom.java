@@ -220,8 +220,32 @@ public class Sbuscom {
 		panelAdvanced.setLayout(null);
 
 		
+		JLabel lblI2CSpeed = new JLabel("Set I2C Speed :");
+		lblI2CSpeed.setBounds(30, 25, 117, 15);
+		panelAdvanced.add(lblI2CSpeed);
 		
+		final JTextPane txtI2CSpeed = new JTextPane();
+		txtI2CSpeed.setBounds(30, 45, 150, 24);
+		panelAdvanced.add(txtI2CSpeed);	
 		
+		JButton btnSetI2CSpeed = new JButton("Set");
+		btnSetI2CSpeed.setBounds(200, 45, 150, 24);
+		panelAdvanced.add(btnSetI2CSpeed);			
+		
+		btnSetI2CSpeed.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				
+				try {
+					long speed = Long.parseLong(txtI2CSpeed.getText().trim());
+					commCont.setI2CSpeed(speed);
+					flowModel.addElement("->Set I2C Speed : " + speed);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+			}
+	    });
 		
 		frame.getContentPane().add(tabbedPane);
 		

@@ -234,6 +234,27 @@ public class CommController
 		return checkOK(receivedData);
 	}
 	
+	public byte[] setI2CSpeed(long speed) throws IOException, InterruptedException, SerialPortException, SerialPortTimeoutException
+	{
+		byte cmd[] = new byte[8];
+		
+		cmd[0] = CommConstants.CMD_START;
+		cmd[1] = CommConstants.CMD_SET_I2C_SPEED;
+		cmd[2] = (byte)((speed>>24) & 0xFF);
+		cmd[3] = (byte)((speed>>16) & 0xFF);
+		cmd[4] = (byte)((speed>>8) & 0xFF);
+		cmd[5] = (byte)((speed>>0) & 0xFF);
+		cmd[6] = 0x00;
+		cmd[7] = CommConstants.CMD_END;
+		
+		hal.txData(cmd);
+		
+		Thread.sleep(50);
+		byte[] receivedData = hal.rxData();
+		
+		return receivedData;
+	}
+	
 
 	public void close()
 	{
