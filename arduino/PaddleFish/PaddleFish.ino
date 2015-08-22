@@ -151,10 +151,15 @@ void pfControl()
               char buffer[6];
               if (receiveBytes(6,buffer))
               {
-                unsigned long i2c_speed = buffer[0]<<24 | buffer[1]<<16 | buffer[2]<<8 | buffer[3];
+                unsigned long i2c_speed = 0;
+                unsigned int n1 = ((buffer[0]<<8) + buffer[1]) & 0xFFFF;
+                unsigned int n2 = ((buffer[2]<<8) + buffer[3]) & 0xFFFF;
+                //i2c_speed = (unsigned long)(((unsigned long)(((unsigned long)buffer[1]<<16) + ((unsigned long)buffer[0]<<24)) + (buffer[3]) + (buffer[2]<<8)) & 0xFFFFFFFF);
+                i2c_speed = (((unsigned long)n1)<<16);
+                i2c_speed += n2;
                 lwi2c.i2c_set_speed(i2c_speed);
                 
-                commOK();
+                commOK();                
                 startReceive = false;
                 receivedCmd = CMD_NULL;
               } else 
