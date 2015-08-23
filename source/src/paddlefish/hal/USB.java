@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import jssc.SerialPort;
 import jssc.SerialPortException;
 import jssc.SerialPortList;
-import jssc.SerialPortTimeoutException;
 
 public class USB
 {
@@ -62,7 +61,7 @@ public class USB
 		commPort.writeBytes(buffer);
 	}
 	
-	public byte[] receiveData() throws SerialPortException, SerialPortTimeoutException
+	public byte[] receiveData() throws Exception
 	{
 		byte[] resBuffer = new byte[1024];
 		byte[] buffer = new byte[1024];
@@ -82,6 +81,12 @@ public class USB
 				if (resBuffer[prev_len-1] == 0x0C)
 				{
 					loop = false;
+				}
+				
+				if (resBuffer[prev_len-1] == 0x0E)
+				{
+					loop = false;
+					throw new Exception("I2C Error! Check if I2C device connected properly. Slow down the I2C speed from Advanced tab.");
 				}
 			}
 		} while( loop );	

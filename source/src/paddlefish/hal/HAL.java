@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import jssc.SerialPortException;
-import jssc.SerialPortTimeoutException;
 
 
 public class HAL {
@@ -20,31 +19,14 @@ public class HAL {
 		return usbComm.listPorts();
 	}
 	
-	public boolean connect(String port, int baud)
+	public void connect(String port, int baud) throws SerialPortException
 	{
-		
-		try {
-			// Linux - Ubuntu
-			usbComm.connect(port,baud); //"/dev/ttyACM0",115200
-			// Windows
-			//usbComm.connect(port,baud);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		}
-		
-		return true;
+		usbComm.connect(port,baud);
 	}
 	
-	public void disconnect()
+	public void disconnect() throws SerialPortException
 	{
-		try {
-			usbComm.disconnect();
-		} catch (SerialPortException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		usbComm.disconnect();
 	}
 	
 	public boolean isConnected()
@@ -62,7 +44,7 @@ public class HAL {
 		}
 	}
 	
-	public byte[] rxData() throws IOException, SerialPortException, SerialPortTimeoutException
+	public byte[] rxData() throws Exception
 	{		
 		return usbComm.receiveData();
 	}

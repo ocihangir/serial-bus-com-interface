@@ -4,10 +4,6 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Formatter;
 
@@ -18,20 +14,19 @@ import paddlefish.protocol.CommController;
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.xml.crypto.Data;
 import javax.swing.JTextArea;
 
 public class Sbuscom {
 
 	private JFrame frame;
 	private JButton btnConnect;
+	private static JLabel lblShowStat;
 	private static CommController commCont = null;
 
 	/**
@@ -47,6 +42,7 @@ public class Sbuscom {
 					window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
+					lblShowStat.setText(e.getMessage());
 				}
 			}
 		});
@@ -94,10 +90,12 @@ public class Sbuscom {
 		
 		JLabel lblIcAddress = new JLabel("I2C Address :");
 		lblIcAddress.setBounds(30, 85, 117, 15);
+		
 		panelBasic.add(lblIcAddress);
 		
 		final JTextPane txtI2C = new JTextPane();
 		txtI2C.setBounds(30, 105, 98, 21);
+		txtI2C.setToolTipText("One byte I2C Device Address. Can be found from device data sheet. Hex Format : 50");
 		panelBasic.add(txtI2C);		
 		
 		JLabel lblRegisterAddress = new JLabel("Register Address :");
@@ -106,6 +104,7 @@ public class Sbuscom {
 		
 		final JTextPane txtReg = new JTextPane();
 		txtReg.setBounds(30, 165, 98, 21);
+		txtReg.setToolTipText("One byte Device Register Address. Hex Format : 01");
 		panelBasic.add(txtReg);
 		
 		JLabel lblLength = new JLabel("Data Length :");
@@ -114,6 +113,7 @@ public class Sbuscom {
 		
 		final JTextPane txtLength = new JTextPane();
 		txtLength.setBounds(30, 225, 98, 21);
+		txtLength.setToolTipText("Number of bytes to be read starting from Register Address. Decimal value.");
 		panelBasic.add(txtLength);
 		
 		JLabel lblData = new JLabel("Data :");
@@ -124,6 +124,7 @@ public class Sbuscom {
 		txtData.setBounds(30, 285, 300, 130);		
 		txtData.setLineWrap(true);
 		txtData.setWrapStyleWord(true);		
+		txtData.setToolTipText("Bytes to be read. Accepts multiple bytes. Hex Format : 00 11 22 33 44 55 ...");
 		panelBasic.add(txtData);
 		
 		JScrollPane scrData = new JScrollPane(txtData);
@@ -151,8 +152,9 @@ public class Sbuscom {
 		lblStat.setBounds(5, 505, 90, 15);		
 		frame.getContentPane().add(lblStat);
 		
-		JLabel lblShowStat = new JLabel("OK");
+		lblShowStat = new JLabel("OK");
 		lblShowStat.setBounds(60, 505, 580, 15);
+		lblShowStat.setToolTipText(lblShowStat.getText());
 		frame.getContentPane().add(lblShowStat);
 		
 		JButton btnWrite = new JButton("Write");
@@ -170,8 +172,10 @@ public class Sbuscom {
 						data[i] = (byte) str2hex(splitData[i]);
 					commCont.writeByteArray(str2hex(txtI2C.getText()), str2hex(txtReg.getText()), data.length, data);
 					flowModel.addElement(txtI2C.getText() + "  |  " + txtReg.getText() + "   |  " + data.length + "    |  >  | " + txtData.getText());
+					lblShowStat.setText("OK");
 				} catch (Exception e) {
 					e.printStackTrace();
+					lblShowStat.setText(e.getMessage());
 				}
 				
 			}
@@ -190,8 +194,10 @@ public class Sbuscom {
 					int len = Integer.parseInt(txtLength.getText());
 					byte data[] = commCont.readByteArray(str2hex(txtI2C.getText()), str2hex(txtReg.getText()), len);
 					flowModel.addElement(txtI2C.getText() + "  |  " + txtReg.getText() + "   |   " + len + "   |  <  | " + hex2str(data));
+					lblShowStat.setText("OK");
 				} catch (Exception e) {
 					e.printStackTrace();
+					lblShowStat.setText(e.getMessage());
 				}
 				
 			}
@@ -200,6 +206,8 @@ public class Sbuscom {
 		btnConnect.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent event) {
+				try
+				{
 				if ( commCont.isConnected() )
 				{
 					commCont.disconnect();
@@ -208,7 +216,10 @@ public class Sbuscom {
 					commCont.connect((String)comboBox.getSelectedItem(), 115200);
 					btnConnect.setText("Disconnect");
 				}
-				
+				} catch (Exception e) {
+					e.printStackTrace();
+					lblShowStat.setText(e.getMessage());
+				}
 				
 			}
 	    });
@@ -220,8 +231,9 @@ public class Sbuscom {
 		panelAdvanced.setLayout(null);
 
 		
-		JLabel lblI2CSpeed = new JLabel("Set I2C Speed :");
-		lblI2CSpeed.setBounds(30, 25, 117, 15);
+		JLabel lblI2CSpeed = new JLabel("Set I2C Speed (Hz) :");
+		lblI2CSpeed.setBounds(30, 25, 160, 15);
+		lblI2CSpeed.setToolTipText("A value between 500Hz~880000Hz");
 		panelAdvanced.add(lblI2CSpeed);
 		
 		final JTextPane txtI2CSpeed = new JTextPane();
@@ -240,8 +252,10 @@ public class Sbuscom {
 					long speed = Long.parseLong(txtI2CSpeed.getText().trim());
 					commCont.setI2CSpeed(speed);
 					flowModel.addElement("->Set I2C Speed : " + speed);
+					lblShowStat.setText("OK");
 				} catch (Exception e) {
 					e.printStackTrace();
+					lblShowStat.setText(e.getMessage());
 				}
 				
 			}

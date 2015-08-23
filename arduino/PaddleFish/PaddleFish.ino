@@ -143,6 +143,7 @@ void pfControl()
         // Read command after the communication starts
         receivedCmd = Serial.read();
       else {
+        
         switch (receivedCmd)
         {
           case CMD_SET_I2C_SPEED: /* |START|Cmd|Speed[4]|CRC|End| */ 
@@ -151,6 +152,8 @@ void pfControl()
               char buffer[6];
               if (receiveBytes(6,buffer))
               {
+                lwi2c.reset_last_error();
+                
                 unsigned long i2c_speed = 0;
                 unsigned int n1 = ((buffer[0]<<8) + buffer[1]) & 0xFFFF;
                 unsigned int n2 = ((buffer[2]<<8) + buffer[3]) & 0xFFFF;
@@ -172,6 +175,8 @@ void pfControl()
               char buffer[3];
               if (receiveBytes(3,buffer))
               {
+                lwi2c.reset_last_error();
+                
                 // Start stream if On is CMD_OK
                 if (buffer[0]==0x00)
                   setStream(false);
@@ -191,6 +196,8 @@ void pfControl()
               char buffer[2];
               if (receiveBytes(2,buffer))
               {
+                lwi2c.reset_last_error();
+                
                 // Reset stream buffer
                 streamReset();
                 
@@ -207,6 +214,8 @@ void pfControl()
               char buffer[4];
               if (receiveBytes(4,buffer))
               {
+                lwi2c.reset_last_error();
+                
                 // Set timer period
                 unsigned int period = ((buffer[0]<<8) + buffer[1]) & 0xFFFF;
                 setPeriod(period);
@@ -224,6 +233,8 @@ void pfControl()
               char buffer[7];
               if (receiveBytes(7,buffer))
               {
+                lwi2c.reset_last_error();
+                
                 // Add command to stream buffer
                 streamAddCmd(buffer);
                 
@@ -240,6 +251,8 @@ void pfControl()
               char buffer[5];
               if (receiveBytes(5,buffer))
               {
+                lwi2c.reset_last_error();
+                
                 // Read data from i2c device
                 char* recBuf = pfReadBytes(buffer[0],buffer[1],buffer[2]);
                 
@@ -249,8 +262,10 @@ void pfControl()
                 {
                   Serial.write(recBuf[dataCount]);
                 }
-                
-                Serial.write(CMD_END);
+                if ( !lwi2c.get_last_error() )
+                  Serial.write(CMD_END);
+                else
+                  Serial.write(CMD_ESC);
                 startReceive = false;
                 receivedCmd = CMD_NULL;
               } else 
@@ -263,6 +278,8 @@ void pfControl()
                 char buffer[4];
                 if ( receiveBytes(4,buffer) )
                 {
+                  lwi2c.reset_last_error();
+                  
                   char dataBuffer[buffer[2]];
                   Serial.readBytes(dataBuffer, buffer[2]);
                   if ( Serial.read() == CMD_END )
@@ -270,7 +287,10 @@ void pfControl()
                   else 
                     commError();
                     
-                  commOK();
+                  if ( !lwi2c.get_last_error() )
+                    commOK();
+                  else
+                    commNOK();
                   receivedCmd = CMD_NULL;
                   startReceive = false;
                 } else 
@@ -283,11 +303,20 @@ void pfControl()
               char buffer[6];
               if ( receiveBytes(6,buffer) )
               {
+                lwi2c.reset_last_error();
+                
                 char sendData[1];
                 char* recBuf = pfReadBytes(buffer[0],buffer[1],1);
                 sendData[0] = (buffer[3] & buffer[2]) | (~buffer[3] & recBuf[0]);
-                commOK();
-                pfWriteBytes(buffer[0], buffer[1], 1, sendData);
+                
+                if ( !lwi2c.get_last_error() )
+                    commOK();
+                  else
+                    commNOK();
+                
+                if ( !lwi2c.get_last_error() )
+                  pfWriteBytes(buffer[0], buffer[1], 1, sendData);
+                  
                 receivedCmd = CMD_NULL;
                 startReceive = false;
               } else 
@@ -371,11 +400,20 @@ void heartBeat()
 char* pfReadBytes(char devAddress, char regAddress, char length)
 {
   char sendData[1];
+  char* sendNull = {0x00};
   sendData[0]=regAddress;
   lwi2c.i2c_start();
+  /*if (!lwi2c.get_last_error())
+    return sendNull;*/
   lwi2c.i2c_write(devAddress,1,(char*)sendData);
+  /*if (!lwi2c.get_last_error())
+    return sendNull;*/
   lwi2c.i2c_repeated_start();
+  /*if (!lwi2c.get_last_error())
+    return sendNull;*/
   char* receiveBuffer = lwi2c.i2c_read(devAddress,length);
+  /*if (!lwi2c.get_last_error())
+    return sendNull;*/
   lwi2c.i2c_stop();
   
   return receiveBuffer;
@@ -423,6 +461,13 @@ void commOK()
   Serial.write(CMD_ANSWER);                
   Serial.write(CMD_OK);
   Serial.write(CMD_END);
+}
+
+void commNOK()
+{
+  Serial.write(CMD_ANSWER);                
+  Serial.write((byte)CMD_NULL);
+  Serial.write(CMD_ESC);
 }
 
 void disableInterrupt()

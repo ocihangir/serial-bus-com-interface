@@ -2,9 +2,6 @@ package paddlefish.test;
 
 import java.io.IOException;
 
-import jssc.SerialPortException;
-import jssc.SerialPortTimeoutException;
-
 import paddlefish.protocol.CommController;
 
 import paddlefish.protocol.CommConstants;
@@ -16,7 +13,7 @@ public class CommunicationTester {
 		byte[] data = null;
 		try {
 			data = commCont.readByteArray(deviceAddress, registerAddress, length);
-		} catch (SerialPortException | SerialPortTimeoutException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -33,22 +30,22 @@ public class CommunicationTester {
 		return buffer;
 	}
 	
-	public static void testWriteSingleByte(byte deviceAddress, byte registerAddress, byte data) throws IOException, InterruptedException
+	public static void testWriteSingleByte(byte deviceAddress, byte registerAddress, byte data)
 	{
 		try {
 			commCont.writeSingleByte(deviceAddress, registerAddress, data);
-		} catch (SerialPortException | SerialPortTimeoutException e) {
+		} catch ( Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		System.out.println("Data written");		
 	}
 	
-	public static void testWriteMultiBytes(byte deviceAddress, byte registerAddress, byte[] data) throws IOException, InterruptedException
+	public static void testWriteMultiBytes(byte deviceAddress, byte registerAddress, byte[] data)
 	{
 		try {
 			commCont.writeByteArray(deviceAddress, registerAddress, data.length, data);
-		} catch (SerialPortException | SerialPortTimeoutException e) {
+		} catch ( Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
