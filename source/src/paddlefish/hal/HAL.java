@@ -69,6 +69,7 @@ public class HAL {
 				{
 					loop = false;
 					throw new Exception("I2C Error! Check if I2C device connected properly. Slow down the I2C speed from Advanced tab.");
+					// TODO : Create an exception class for I2C
 				}
 			}
 		} while( loop );

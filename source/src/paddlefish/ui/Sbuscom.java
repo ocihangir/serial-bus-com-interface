@@ -232,12 +232,12 @@ public class Sbuscom {
 
 		
 		JLabel lblI2CSpeed = new JLabel("Set I2C Speed (Hz) :");
-		lblI2CSpeed.setBounds(30, 25, 160, 15);
-		lblI2CSpeed.setToolTipText("A value between 500Hz~880000Hz");
+		lblI2CSpeed.setBounds(30, 25, 160, 15);		
 		panelAdvanced.add(lblI2CSpeed);
 		
 		final JTextPane txtI2CSpeed = new JTextPane();
 		txtI2CSpeed.setBounds(30, 45, 150, 24);
+		txtI2CSpeed.setToolTipText("A value between 500Hz~880000Hz");
 		panelAdvanced.add(txtI2CSpeed);	
 		
 		JButton btnSetI2CSpeed = new JButton("Set");

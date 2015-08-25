@@ -21,7 +21,7 @@ public class CommController
 			hal = new HAL();
 		 // TODO : implement CRC
 		 // TODO : timeout control needed
-		 // TODO : create a thread for serial read and write
+		 // TODO : create a thread for serial read
 	}
 	   
 

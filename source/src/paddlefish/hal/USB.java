@@ -7,6 +7,7 @@ import jssc.SerialPort;
 import jssc.SerialPortException;
 import jssc.SerialPortList;
 
+// TODO : implement an interface for serial communication
 public class USB
 {
 	InputStream in;
