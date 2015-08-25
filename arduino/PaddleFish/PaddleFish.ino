@@ -454,6 +454,7 @@ void commError()
   // Error in UART communication
   receivedCmd = CMD_NULL;
   startReceive = false;
+  commNOK();
 }
 
 void commOK()
