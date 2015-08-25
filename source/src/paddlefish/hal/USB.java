@@ -61,38 +61,12 @@ public class USB
 		commPort.writeBytes(buffer);
 	}
 	
-	public byte[] receiveData() throws Exception
+	public byte[] receiveData(int timeout) throws Exception
 	{
-		byte[] resBuffer = new byte[1024];
-		byte[] buffer = new byte[1024];
-		int len = 0;
-		int prev_len = 0;
-		boolean loop = true;
-		do 
-		{
-			len = commPort.getInputBufferBytesCount();
-			buffer = commPort.readBytes(len,2000);
+		int len = commPort.getInputBufferBytesCount();
+		byte[] buffer = commPort.readBytes(len,timeout);
 			
-			System.arraycopy(buffer, 0, resBuffer, prev_len, len);
-			prev_len+=len;
-			
-			if (prev_len>0)
-			{
-				if (resBuffer[prev_len-1] == 0x0C)
-				{
-					loop = false;
-				}
-				
-				if (resBuffer[prev_len-1] == 0x0E)
-				{
-					loop = false;
-					throw new Exception("I2C Error! Check if I2C device connected properly. Slow down the I2C speed from Advanced tab.");
-				}
-			}
-		} while( loop );	
-		byte[] res = new byte[prev_len];
-		System.arraycopy(resBuffer, 0, res, 0, prev_len);
-		return res;
+		return buffer;
 	}
 	
 	  public ArrayList<String> listPorts()
