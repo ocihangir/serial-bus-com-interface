@@ -1,17 +1,22 @@
 package paddlefish.protocol;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import jssc.SerialPortException;
+import paddlefish.hal.CommRxInterface;
 import paddlefish.hal.HAL;
 import paddlefish.protocol.CommConstants;
 
 
 /*Singleton class Pattern is used*/
-public class CommController 
+/*Observer Pattern is used*/
+public class CommController implements CommRxInterface
 {
 	private static CommController instance = null;
 	private static HAL hal;
+	
+	private List<CommRxInterface> receiverList = new ArrayList<CommRxInterface>();
 	
 	protected CommController() throws Exception 
 	{
@@ -22,6 +27,7 @@ public class CommController
 		 // TODO : implement CRC
 		 // TODO : timeout control needed
 		 // TODO : create a thread for serial read
+		 hal.addReceiver(this);
 	}
 	   
 
@@ -32,6 +38,17 @@ public class CommController
 	      }
 	      return instance;
 	}
+    
+    public void addReceiver(CommRxInterface commRx)
+    {
+    	receiverList.add(commRx);
+    }
+    
+    public void commReceived(byte[] receivedMessage)
+    {
+        for (CommRxInterface commRx : receiverList)
+        	commRx.commReceiver(receivedMessage);
+    }
     
     public boolean isConnected()
     {
@@ -54,7 +71,7 @@ public class CommController
     	hal.disconnect();
     }
     
-	public byte[] readByteArray(byte deviceAddress, byte registerAddress, int length) throws Exception
+	public void readByteArray(byte deviceAddress, byte registerAddress, int length) throws Exception
 	{
 		byte cmd[] = new byte[7];
 		
@@ -69,9 +86,9 @@ public class CommController
 		hal.txData(cmd);
 		
 		Thread.sleep(50);
-		byte[] receivedData = hal.rxData();
+		//byte[] receivedData = hal.rxData();
 		
-		return receivedData;
+		//return receivedData;
 	}
 	
 	public boolean writeSingleByte(byte deviceAddress, byte registerAddress, byte data) throws Exception
@@ -94,7 +111,7 @@ public class CommController
 		return checkOK(receivedData);
 	}
 	
-	public boolean writeByteArray(byte deviceAddress, byte registerAddress, int length, byte data[]) throws Exception
+	public void writeByteArray(byte deviceAddress, byte registerAddress, int length, byte data[]) throws Exception
 	{
 		byte cmd[] = new byte[8+length];
 		
@@ -110,9 +127,9 @@ public class CommController
 		
 		hal.txData(cmd);
 		
-		byte[] receivedData = hal.rxData();
+		//byte[] receivedData = hal.rxData();
 		
-		return checkOK(receivedData);
+		//return checkOK(receivedData);
 	}
 	
 	public boolean writeBits(byte deviceAddress, byte registerAddress, byte data, byte mask) throws Exception
@@ -269,5 +286,12 @@ public class CommController
 		if ( (ans[0] != CommConstants.CMD_START) || (ans[1] != CommConstants.CMD_OK) || (ans[2] != CommConstants.CMD_END))
 			return false;
 		return true;
+	}
+
+
+	@Override
+	public void commReceiver(byte[] receivedMessage) {
+		for (CommRxInterface commRx : receiverList)
+        	commRx.commReceiver(receivedMessage);
 	}
 }

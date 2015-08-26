@@ -12,7 +12,7 @@ public class CommunicationTester {
 	{
 		byte[] data = null;
 		try {
-			data = commCont.readByteArray(deviceAddress, registerAddress, length);
+			commCont.readByteArray(deviceAddress, registerAddress, length);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

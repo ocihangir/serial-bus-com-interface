@@ -9,6 +9,7 @@ import java.util.Formatter;
 
 import javax.swing.JFrame;
 
+import paddlefish.hal.CommRxInterface;
 import paddlefish.protocol.CommController;
 
 import javax.swing.DefaultListModel;
@@ -22,12 +23,16 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JTextArea;
 
-public class Sbuscom {
+public class Sbuscom implements CommRxInterface{
 
 	private JFrame frame;
 	private JButton btnConnect;
 	private static JLabel lblShowStat;
 	private static CommController commCont = null;
+	DefaultListModel<String> flowModel = null;
+	JTextPane txtReg;
+	JTextPane txtI2CSpeed;
+	JTextPane txtI2C;
 
 	/**
 	 * Launch the application.
@@ -38,6 +43,7 @@ public class Sbuscom {
 				try {
 					//System.setOut(new PrintStream(new FileOutputStream("output.txt")));
 					commCont = CommController.getInstance();
+					
 					Sbuscom window = new Sbuscom();
 					window.frame.setVisible(true);
 				} catch (Exception e) {
@@ -93,7 +99,7 @@ public class Sbuscom {
 		
 		panelBasic.add(lblIcAddress);
 		
-		final JTextPane txtI2C = new JTextPane();
+		txtI2C = new JTextPane();
 		txtI2C.setBounds(30, 105, 98, 21);
 		txtI2C.setToolTipText("One byte I2C Device Address. Can be found from device data sheet. Hex Format : 50");
 		panelBasic.add(txtI2C);		
@@ -102,7 +108,7 @@ public class Sbuscom {
 		lblRegisterAddress.setBounds(30, 145, 141, 15);
 		panelBasic.add(lblRegisterAddress);
 		
-		final JTextPane txtReg = new JTextPane();
+		txtReg = new JTextPane();
 		txtReg.setBounds(30, 165, 98, 21);
 		txtReg.setToolTipText("One byte Device Register Address. Hex Format : 01");
 		panelBasic.add(txtReg);
@@ -137,7 +143,7 @@ public class Sbuscom {
 		lblList.setBounds(350, 25, 267, 15);
 		panelBasic.add(lblList);
 		
-		final DefaultListModel<String> flowModel = new DefaultListModel<String>();  
+		flowModel = new DefaultListModel<String>();  
 		JList<String> lstFlow = new JList<String>(flowModel);
 		lstFlow.setBounds(350, 45, 267, 415);
 		panelBasic.add(lstFlow);
@@ -192,8 +198,8 @@ public class Sbuscom {
 			public void actionPerformed(ActionEvent event) {
 				try {
 					int len = Integer.parseInt(txtLength.getText());
-					byte data[] = commCont.readByteArray(str2hex(txtI2C.getText()), str2hex(txtReg.getText()), len);
-					flowModel.addElement(txtI2C.getText() + "  |  " + txtReg.getText() + "   |   " + len + "   |  <  | " + hex2str(data));
+					commCont.readByteArray(str2hex(txtI2C.getText()), str2hex(txtReg.getText()), len);
+					//flowModel.addElement(txtI2C.getText() + "  |  " + txtReg.getText() + "   |   " + len + "   |  <  | " + hex2str(data));
 					lblShowStat.setText("OK");
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -235,7 +241,7 @@ public class Sbuscom {
 		lblI2CSpeed.setBounds(30, 25, 160, 15);		
 		panelAdvanced.add(lblI2CSpeed);
 		
-		final JTextPane txtI2CSpeed = new JTextPane();
+		txtI2CSpeed = new JTextPane();
 		txtI2CSpeed.setBounds(30, 45, 150, 24);
 		txtI2CSpeed.setToolTipText("A value between 500Hz~880000Hz");
 		panelAdvanced.add(txtI2CSpeed);	
@@ -262,6 +268,8 @@ public class Sbuscom {
 	    });
 		
 		frame.getContentPane().add(tabbedPane);
+		
+		commCont.addReceiver(this);
 		
 	}
 	
@@ -335,5 +343,11 @@ public class Sbuscom {
 		}
 		
 		return res;
+	}
+
+	@Override
+	public void commReceiver(byte[] buffer) {
+		// TODO Auto-generated method stub
+		flowModel.addElement(txtI2C.getText() + "  |  " + txtReg.getText() + "   |   " + buffer.length + "   |  <  | " + hex2str(buffer));
 	}
 }

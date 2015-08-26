@@ -2,17 +2,25 @@ package paddlefish.hal;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import jssc.SerialPortException;
 
 
-public class HAL {
+public class HAL implements CommRxInterface {
 	USB usbComm;
+	private List<CommRxInterface> receiverList = new ArrayList<CommRxInterface>();
 	
 	public HAL() throws Exception
 	{
 		usbComm = new USB();
+		usbComm.addReceiver(this);
 	}
+	
+	public void addReceiver(CommRxInterface commRx)
+    {
+    	receiverList.add(commRx);
+    }
 	
 	public ArrayList<String> listAvailablePorts()
 	{
@@ -89,5 +97,36 @@ public class HAL {
 			}
 		else
 			System.out.println("No UsbComm available");
+	}
+
+	@Override
+	public void commReceiver(byte[] buffer) {
+		int len = 0;
+		len = buffer.length;
+			
+		if (len>0)
+		{
+			if (buffer[len-1] == 0x0C)
+			{
+				// We need to categorize answers to let observers know 
+				for (CommRxInterface commRx : receiverList)
+		        	commRx.commReceiver(buffer);
+			} else if (buffer[len-1] == 0x0E)
+			{
+				try {
+					throw new Exception("I2C Error! Check if I2C device connected properly. Slow down the I2C speed from Advanced tab.");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else {
+				try {
+					throw new Exception("There is an answer from com device but doesn't end with a proper character!");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }

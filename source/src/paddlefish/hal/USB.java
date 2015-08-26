@@ -3,12 +3,16 @@ package paddlefish.hal;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.List;
+
 import jssc.SerialPort;
+import jssc.SerialPortEvent;
+import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 import jssc.SerialPortList;
 
 // TODO : implement an interface for serial communication
-public class USB
+public class USB implements SerialPortEventListener
 {
 	InputStream in;
 	OutputStream out;
@@ -16,11 +20,17 @@ public class USB
 	SerialPort commPort;
 	SerialPortList serialPorts;	
 	
+	private List<CommRxInterface> receiverList = new ArrayList<CommRxInterface>();
+	
 	public USB() throws Exception
 	{	
 		
-		
 	}
+	
+	public void addReceiver(CommRxInterface commRx)
+    {
+    	receiverList.add(commRx);
+    }
 	
 	public boolean isConnected()
 	{
@@ -38,6 +48,7 @@ public class USB
 		commPort = new SerialPort(portName);
 		commPort.openPort();
 		commPort.setParams(baudRate, 8, 1, 0);
+		commPort.addEventListener(this);
 	}
 	
 	public void disconnect() throws SerialPortException
@@ -69,6 +80,23 @@ public class USB
 			
 		return buffer;
 	}
+	
+	public void serialEvent(SerialPortEvent event) {
+		if(event.isRXCHAR()){//If data is available
+			if(event.getEventValue() > 0){//Check bytes count in the input buffer
+				//Read data, if 10 bytes available 
+				try {
+					byte buffer[] = commPort.readBytes();
+					for (CommRxInterface commRx : receiverList)
+			        	commRx.commReceiver(buffer);
+				}
+				catch (SerialPortException ex) {
+					System.out.println(ex);
+				}
+			}
+		}           
+	}
+
 	
 	  public ArrayList<String> listPorts()
 	    {
