@@ -23,7 +23,7 @@ public class CommStreamer implements CommStreamerInterface {
 		streamReceiverList.add(commRx);
     }
 	
-	public void addDevice(byte deviceAddress, byte registerAddress, byte length, int period) throws Exception
+	public void addDevice(byte deviceAddress, byte registerAddress, int length, int period) throws Exception
 	{
 		byte cmd[] = new byte[9];
 		
@@ -50,9 +50,9 @@ public class CommStreamer implements CommStreamerInterface {
 		byte cmd[] = new byte[6];
 		
 		cmd[0] = CommConstants.CMD_START;
-		cmd[1] = CommConstants.CMD_STREAM_ADD;
-		cmd[2] = (byte)( period & 0xFF );
-		cmd[3] = (byte)( ( period >> 8 ) & 0xFF );
+		cmd[1] = CommConstants.CMD_STREAM_PERIOD;
+		cmd[2] = (byte)( ( period >> 8 ) & 0xFF );
+		cmd[3] = (byte)( period & 0xFF );
 		cmd[4] = 0x00;
 		cmd[5] = CommConstants.CMD_END;
 		
@@ -69,7 +69,7 @@ public class CommStreamer implements CommStreamerInterface {
 		byte cmd[] = new byte[5];
 		
 		cmd[0] = CommConstants.CMD_START;
-		cmd[1] = CommConstants.CMD_STREAM_ADD;
+		cmd[1] = CommConstants.CMD_STREAM_ON;
 		cmd[2] = 0x01;
 		cmd[3] = 0x00;
 		cmd[4] = CommConstants.CMD_END;
@@ -87,7 +87,7 @@ public class CommStreamer implements CommStreamerInterface {
 		byte cmd[] = new byte[5];
 		
 		cmd[0] = CommConstants.CMD_START;
-		cmd[1] = CommConstants.CMD_STREAM_ADD;
+		cmd[1] = CommConstants.CMD_STREAM_ON;
 		cmd[2] = 0x00;
 		cmd[3] = 0x00;
 		cmd[4] = CommConstants.CMD_END;
@@ -105,7 +105,7 @@ public class CommStreamer implements CommStreamerInterface {
 		byte cmd[] = new byte[4];
 		
 		cmd[0] = CommConstants.CMD_START;
-		cmd[1] = CommConstants.CMD_STREAM_ADD;
+		cmd[1] = CommConstants.CMD_STREAM_RST;
 		cmd[2] = 0x00;
 		cmd[3] = CommConstants.CMD_END;
 		
@@ -120,8 +120,8 @@ public class CommStreamer implements CommStreamerInterface {
 	@Override
 	public void streamReceiver(byte[] buffer) {
 		// TODO Auto-generated method stub
-		for (CommStreamerInterface commRx : streamReceiverList)
-        	commRx.streamReceiver(buffer);
+		for (CommStreamerInterface commStreamer : streamReceiverList)
+			commStreamer.streamReceiver(buffer);
 	}
 	
 }

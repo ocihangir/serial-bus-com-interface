@@ -10,8 +10,10 @@ import java.util.Formatter;
 import javax.swing.JFrame;
 
 import paddlefish.hal.CommControllerInterface;
+import paddlefish.hal.CommStreamerInterface;
 import paddlefish.protocol.CommConstants;
 import paddlefish.protocol.CommController;
+import paddlefish.protocol.CommStreamer;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
@@ -24,16 +26,21 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JTextArea;
 
-public class Sbuscom implements CommControllerInterface{
+public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 
 	private JFrame frame;
 	private JButton btnConnect;
 	private static JLabel lblShowStat;
 	private static CommController commCont = null;
+	private static CommStreamer commStreamer = null;
 	DefaultListModel<String> flowModel = null;
 	JTextPane txtReg;
 	JTextPane txtI2CSpeed;
 	JTextPane txtI2C;
+	
+	DefaultListModel<String> streamFlowModel = null;
+	DefaultListModel<String> streamDeviceFlowModel = null;
+	
 
 	/**
 	 * Launch the application.
@@ -44,7 +51,7 @@ public class Sbuscom implements CommControllerInterface{
 				try {
 					//System.setOut(new PrintStream(new FileOutputStream("output.txt")));
 					commCont = new CommController();
-					
+					commStreamer = new CommStreamer();
 					Sbuscom window = new Sbuscom();
 					window.frame.setVisible(true);
 				} catch (Exception e) {
@@ -97,7 +104,6 @@ public class Sbuscom implements CommControllerInterface{
 		
 		JLabel lblIcAddress = new JLabel("I2C Address :");
 		lblIcAddress.setBounds(30, 85, 117, 15);
-		
 		panelBasic.add(lblIcAddress);
 		
 		txtI2C = new JTextPane();
@@ -268,10 +274,164 @@ public class Sbuscom implements CommControllerInterface{
 			}
 	    });
 		
+		JPanel panelStream = new JPanel(false);
+		
+		tabbedPane.addTab("Stream", panelStream);
+		panelStream.setLayout(null);
+		
+		
+		JLabel lblIcStreamAddress = new JLabel("I2C Addr :");
+		lblIcStreamAddress.setBounds(30, 300, 70, 15);
+		panelStream.add(lblIcStreamAddress);
+		
+		final JTextPane txtI2CStream = new JTextPane();
+		txtI2CStream.setBounds(30, 320, 60, 21);
+		txtI2CStream.setToolTipText("One byte I2C Device Address. Can be found from device data sheet. Hex Format : 50");
+		panelStream.add(txtI2CStream);		
+		
+		JLabel lblRegisterStreamAddress = new JLabel("Reg Addr :");
+		lblRegisterStreamAddress.setBounds(130, 300, 80, 15);
+		panelStream.add(lblRegisterStreamAddress);
+		
+		final JTextPane txtRegStream = new JTextPane();
+		txtRegStream.setBounds(130, 320, 60, 21);
+		txtRegStream.setToolTipText("One byte Device Register Address. Hex Format : 01");
+		panelStream.add(txtRegStream);
+		
+		JLabel lblLengthStream = new JLabel("Length :");
+		lblLengthStream.setBounds(230, 300, 70, 15);
+		panelStream.add(lblLengthStream);
+		
+		final JTextPane txtLengthStream = new JTextPane();
+		txtLengthStream.setBounds(230, 320, 60, 21);
+		txtLengthStream.setToolTipText("Number of bytes to be read starting from Register Address. Decimal value.");
+		panelStream.add(txtLengthStream);
+		
+		JLabel lblDeviceList = new JLabel("Stream Device List :");
+		lblDeviceList.setBounds(30, 25, 267, 15);
+		panelStream.add(lblDeviceList);
+		
+		streamDeviceFlowModel = new DefaultListModel<String>();  
+		JList<String> lstStreamFlow = new JList<String>(streamDeviceFlowModel);
+		lstStreamFlow.setBounds(30, 45, 267, 250);
+		panelStream.add(lstStreamFlow);
+		
+		JScrollPane scrListStream = new JScrollPane(lstStreamFlow);
+		scrListStream.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		scrListStream.setPreferredSize(new Dimension(250, 250));
+		scrListStream.setBounds(30, 45, 267, 250);
+		panelStream.add(scrListStream);
+		
+		JLabel lblPeriod = new JLabel("Stream Period :");
+		lblPeriod.setBounds(30, 360, 141, 15);
+		panelStream.add(lblPeriod);
+		
+		final JTextPane txtPeriod = new JTextPane();
+		txtPeriod.setBounds(150, 357, 98, 21);
+		txtPeriod.setToolTipText("Stream Period in ms.");
+		panelStream.add(txtPeriod);
+		
+		txtPeriod.setText("1000");
+		
+		JButton btnAddStreamDevice = new JButton("Add");
+		btnAddStreamDevice.setBounds(30, 380, 80, 24);
+		panelStream.add(btnAddStreamDevice);			
+		
+		btnAddStreamDevice.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				
+				try {
+					int period = Integer.parseInt(txtPeriod.getText().trim());
+					int len = Integer.parseInt(txtLengthStream.getText());
+					commStreamer.setPeriod(period);
+					commStreamer.addDevice(str2hex(txtI2CStream.getText()), str2hex(txtRegStream.getText()), len, period);
+					streamDeviceFlowModel.addElement("I2C:" + txtI2CStream.getText() + " Reg:" + txtRegStream.getText() + " Len:" + txtLengthStream.getText());
+				} catch (Exception e) {
+					e.printStackTrace();
+					lblShowStat.setText(e.getMessage());
+				}
+				
+			}
+	    });
+		
+		JButton btnResetStream = new JButton("Reset");
+		btnResetStream.setBounds(130, 380, 80, 24);
+		panelStream.add(btnResetStream);			
+		
+		btnResetStream.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				
+				try {
+					commStreamer.reset();
+					streamDeviceFlowModel.clear();
+				} catch (Exception e) {
+					e.printStackTrace();
+					lblShowStat.setText(e.getMessage());
+				}
+				
+			}
+	    });
+		
+		JButton btnStartStream = new JButton("Start");
+		btnStartStream.setBounds(30, 410, 80, 24);
+		panelStream.add(btnStartStream);			
+		
+		btnStartStream.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				
+				try {
+					commStreamer.start();
+				} catch (Exception e) {
+					e.printStackTrace();
+					lblShowStat.setText(e.getMessage());
+				}
+				
+			}
+	    });
+		
+		JButton btnStopStream = new JButton("Stop");
+		btnStopStream.setBounds(130, 410, 80, 24);
+		panelStream.add(btnStopStream);			
+		
+		btnStopStream.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				
+				try {
+					commStreamer.stop();
+				} catch (Exception e) {
+					e.printStackTrace();
+					lblShowStat.setText(e.getMessage());
+				}
+				
+			}
+	    });
+		
+		JLabel lblStreamList = new JLabel("Stream Data :");
+		lblStreamList.setBounds(350, 25, 267, 15);
+		panelStream.add(lblStreamList);
+		
+		streamFlowModel = new DefaultListModel<String>();  
+		JList<String> lstStreamDataFlow = new JList<String>(streamFlowModel);
+		lstStreamDataFlow.setBounds(350, 45, 267, 415);
+		panelStream.add(lstStreamDataFlow);
+		
+		JScrollPane scrStreamDataList = new JScrollPane(lstStreamDataFlow);
+		scrStreamDataList.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		scrStreamDataList.setPreferredSize(new Dimension(250, 250));
+		scrStreamDataList.setBounds(350, 45, 267, 415);
+		panelStream.add(scrStreamDataList);
+
+		
 		frame.getContentPane().add(tabbedPane);
 		
 		commCont.addDataReceiver(this);
 		commCont.addCommandReceiver(this);
+		
+		commStreamer.addStreamReceiver(this);
 		
 	}
 	
@@ -358,6 +518,8 @@ public class Sbuscom implements CommControllerInterface{
 			lblShowStat.setText("I2C Error! Check if I2C device connected properly. Slow down the I2C speed from Advanced tab.");
 		else
 			lblShowStat.setText("OK");		
+		
+		flowModel.addElement("CMD:" + hex2str(buffer));
 	}
 	
 	private static boolean checkOK(byte ans[])
@@ -365,5 +527,11 @@ public class Sbuscom implements CommControllerInterface{
 		if ( ((byte)ans[0] != (byte)CommConstants.CMD_ANSWER) || ((byte)ans[2] != (byte)CommConstants.CMD_OK) || ((byte)ans[3] != (byte)CommConstants.CMD_END))
 			return false;
 		return true;
+	}
+
+	@Override
+	public void streamReceiver(byte[] buffer) {
+		// TODO Auto-generated method stub
+		streamFlowModel.addElement(hex2str(buffer));
 	}
 }

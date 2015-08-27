@@ -170,7 +170,7 @@ public class HAL implements CommRxInterface {
 				}
 				
 				rxBufferLength = 0;
-			} else if ((byte)rxBuffer[rxBufferLength] == (byte)0xBD)
+			} else if ((byte)rxBuffer[rxBufferLength-1] == (byte)0xBD)
 			{
 				byte tempBuffer[] = new byte[rxBufferLength];
 				System.arraycopy(rxBuffer, 0, tempBuffer, 0, rxBufferLength);
@@ -179,6 +179,7 @@ public class HAL implements CommRxInterface {
 					for (CommStreamerInterface commRx : streamReceiverList)
 			        	commRx.streamReceiver(tempBuffer);
 				}
+				rxBufferLength = 0;
 			} else if ((byte)rxBuffer[rxBufferLength] == (byte)0x0E)
 			{
 				try {
