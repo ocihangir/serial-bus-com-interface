@@ -16,6 +16,7 @@ public class HAL implements CommRxInterface {
 	USB usbComm;
 	private List<CommControllerInterface> dataReceiverList = new ArrayList<CommControllerInterface>();
 	private List<CommControllerInterface> commandReceiverList = new ArrayList<CommControllerInterface>();
+	private List<CommStreamerInterface> streamReceiverList = new ArrayList<CommStreamerInterface>();
 	private byte rxBuffer[] = new byte[1024];
 	private int rxBufferLength = 0;
 	Mutex mutex = new Mutex();
@@ -45,6 +46,11 @@ public class HAL implements CommRxInterface {
 	public void addCommandReceiver(CommControllerInterface commRx)
     {
 		commandReceiverList.add(commRx);
+    }
+	
+	public void addStreamReceiver(CommStreamerInterface commRx)
+    {
+		streamReceiverList.add(commRx);
     }
 	
 	public ArrayList<String> listAvailablePorts()
@@ -164,6 +170,15 @@ public class HAL implements CommRxInterface {
 				}
 				
 				rxBufferLength = 0;
+			} else if ((byte)rxBuffer[rxBufferLength] == (byte)0xBD)
+			{
+				byte tempBuffer[] = new byte[rxBufferLength];
+				System.arraycopy(rxBuffer, 0, tempBuffer, 0, rxBufferLength);
+				if ((byte) rxBuffer[0] == (byte) 0xBE)
+				{
+					for (CommStreamerInterface commRx : streamReceiverList)
+			        	commRx.streamReceiver(tempBuffer);
+				}
 			} else if ((byte)rxBuffer[rxBufferLength] == (byte)0x0E)
 			{
 				try {

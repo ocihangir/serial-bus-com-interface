@@ -349,19 +349,15 @@ public class Sbuscom implements CommControllerInterface{
 
 	@Override
 	public void commDataReceiver(byte[] buffer) {
-		// TODO Auto-generated method stub
-		flowModel.addElement("DATA" + txtI2C.getText() + "  |  " + txtReg.getText() + "   |   " + buffer.length + "   |  <  | " + hex2str(buffer));
+		flowModel.addElement(txtI2C.getText() + "  |  " + txtReg.getText() + "   |   " + buffer.length + "   |  <  | " + hex2str(buffer));
 	}
 	
 	@Override
 	public void commCommandReceiver(byte[] buffer) {
-		// TODO Auto-generated method stub		
 		if ( !checkOK(buffer) )
 			lblShowStat.setText("I2C Error! Check if I2C device connected properly. Slow down the I2C speed from Advanced tab.");
 		else
-			lblShowStat.setText("OK");
-		
-		// flowModel.addElement("CMD" + txtI2C.getText() + "  |  " + txtReg.getText() + "   |   " + buffer.length + "   |  <  | " + hex2str(buffer));
+			lblShowStat.setText("OK");		
 	}
 	
 	private static boolean checkOK(byte ans[])

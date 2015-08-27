@@ -14,9 +14,9 @@ public class CommunicationTester {
 		try {
 			commCont.readByteArray(deviceAddress, registerAddress, length);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		@SuppressWarnings("null")
 		byte[] buffer = new byte[data.length];
 		for (int i=0;i<data.length;i++)
 			buffer[i] = (byte) data[i];
@@ -35,7 +35,6 @@ public class CommunicationTester {
 		try {
 			commCont.writeSingleByte(deviceAddress, registerAddress, data);
 		} catch ( Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		System.out.println("Data written");		
@@ -46,7 +45,6 @@ public class CommunicationTester {
 		try {
 			commCont.writeByteArray(deviceAddress, registerAddress, data.length, data);
 		} catch ( Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		System.out.println("Data written");		
