@@ -4,17 +4,37 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sun.corba.se.impl.orbutil.concurrent.Mutex;
+
+import paddlefish.protocol.CommController;
+
 import jssc.SerialPortException;
 
-
+/*Singleton class Pattern is used*/
+/*Observer Pattern is used*/
 public class HAL implements CommRxInterface {
+	private static HAL instance = null;
 	USB usbComm;
 	private List<CommRxInterface> receiverList = new ArrayList<CommRxInterface>();
+	private byte rxBuffer[] = new byte[1024];
+	private int rxBufferLength = 0;
+	Mutex mutex = new Mutex();
 	
-	public HAL() throws Exception
+	protected HAL() throws Exception
 	{
-		usbComm = new USB();
-		usbComm.addReceiver(this);
+		if (usbComm == null)
+		{
+			usbComm = new USB();
+			usbComm.addReceiver(this);
+		}
+	}
+	
+	public static HAL getInstance() throws Exception {
+	      if(instance == null) 
+	      {
+	         instance = new HAL();
+	      }
+	      return instance;
 	}
 	
 	public void addReceiver(CommRxInterface commRx)
@@ -44,12 +64,25 @@ public class HAL implements CommRxInterface {
 	
 	public void txData(byte data[]) throws IOException
 	{
-		try {
-			usbComm.sendData(data);
-		} catch (SerialPortException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
+			try {
+				mutex.acquire();
+				try {
+					try {
+					usbComm.sendData(data);
+					} catch (SerialPortException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				} finally {
+					mutex.release();
+				}
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+		
 	}
 	
 	public byte[] rxData() throws Exception
@@ -106,12 +139,18 @@ public class HAL implements CommRxInterface {
 			
 		if (len>0)
 		{
-			if (buffer[len-1] == 0x0C)
+			System.arraycopy(buffer, 0, rxBuffer, rxBufferLength, len);
+			rxBufferLength+=len;
+			if (rxBuffer[rxBufferLength-1] == 0x0C)
 			{
+				byte tempBuffer[] = new byte[rxBufferLength];
+				System.arraycopy(rxBuffer, 0, tempBuffer, 0, rxBufferLength);
 				// We need to categorize answers to let observers know 
 				for (CommRxInterface commRx : receiverList)
-		        	commRx.commReceiver(buffer);
-			} else if (buffer[len-1] == 0x0E)
+		        	commRx.commReceiver(tempBuffer);
+				
+				rxBufferLength = 0;
+			} else if (rxBuffer[rxBufferLength] == 0x0E)
 			{
 				try {
 					throw new Exception("I2C Error! Check if I2C device connected properly. Slow down the I2C speed from Advanced tab.");
@@ -119,14 +158,14 @@ public class HAL implements CommRxInterface {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			} else {
+			}/* else {
 				try {
 					throw new Exception("There is an answer from com device but doesn't end with a proper character!");
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}
+			}*/
 		}
 	}
 }

@@ -303,7 +303,7 @@ public class CommunicationTester {
 	
 	public static void main(String[] args) throws Exception
 	{
-		commCont = CommController.getInstance();
+		commCont = new CommController();
 		try {Thread.sleep(2000);} catch (InterruptedException ie) {} // Wait for communication channel is up
 		
 		boolean tst = true;

@@ -9,35 +9,30 @@ import paddlefish.hal.HAL;
 import paddlefish.protocol.CommConstants;
 
 
-/*Singleton class Pattern is used*/
+
 /*Observer Pattern is used*/
 public class CommController implements CommRxInterface
 {
-	private static CommController instance = null;
+	//private static CommController instance = null;
 	private static HAL hal;
 	
 	private List<CommRxInterface> receiverList = new ArrayList<CommRxInterface>();
 	
-	protected CommController() throws Exception 
+	public CommController() throws Exception 
 	{
-		// Exists only to defeat instantiation.
-		//http://www.javaworld.com/article/2073352/core-java/simply-singleton.html
 		 if(hal==null)
-			hal = new HAL();
-		 // TODO : implement CRC
-		 // TODO : timeout control needed
-		 // TODO : create a thread for serial read
+			hal = HAL.getInstance();
 		 hal.addReceiver(this);
 	}
 	   
 
-    public static CommController getInstance() throws Exception {
+    /*public static CommController getInstance() throws Exception {
 	      if(instance == null) 
 	      {
 	         instance = new CommController();
 	      }
 	      return instance;
-	}
+	}*/
     
     public void addReceiver(CommRxInterface commRx)
     {
@@ -91,7 +86,7 @@ public class CommController implements CommRxInterface
 		//return receivedData;
 	}
 	
-	public boolean writeSingleByte(byte deviceAddress, byte registerAddress, byte data) throws Exception
+	public void writeSingleByte(byte deviceAddress, byte registerAddress, byte data) throws Exception
 	{
 		byte cmd[] = new byte[8];
 		
@@ -106,9 +101,9 @@ public class CommController implements CommRxInterface
 		
 		hal.txData(cmd);
 		
-		byte[] receivedData = hal.rxData();
+		//byte[] receivedData = hal.rxData();
 		
-		return checkOK(receivedData);
+		//return checkOK(receivedData);
 	}
 	
 	public void writeByteArray(byte deviceAddress, byte registerAddress, int length, byte data[]) throws Exception
@@ -132,7 +127,7 @@ public class CommController implements CommRxInterface
 		//return checkOK(receivedData);
 	}
 	
-	public boolean writeBits(byte deviceAddress, byte registerAddress, byte data, byte mask) throws Exception
+	public void writeBits(byte deviceAddress, byte registerAddress, byte data, byte mask) throws Exception
 	{
 		byte cmd[] = new byte[8];
 		
@@ -148,13 +143,13 @@ public class CommController implements CommRxInterface
 		hal.txData(cmd);
 		
 		Thread.sleep(50);
-		byte[] receivedData = hal.rxData();
+		//byte[] receivedData = hal.rxData();
 		
-		return checkOK(receivedData);
+		//return checkOK(receivedData);
 	}
 	
 	
-	public boolean addDevice(byte deviceAddress, byte registerAddress, byte length, int period) throws Exception
+	public void addDevice(byte deviceAddress, byte registerAddress, byte length, int period) throws Exception
 	{
 		byte cmd[] = new byte[9];
 		
@@ -171,12 +166,12 @@ public class CommController implements CommRxInterface
 		hal.txData(cmd);
 		
 		Thread.sleep(50);
-		byte[] receivedData = hal.rxData();
+		//byte[] receivedData = hal.rxData();
 		
-		return checkOK(receivedData);
+		//return checkOK(receivedData);
 	}
 	
-	public boolean setPeriod(int period) throws Exception
+	public void setPeriod(int period) throws Exception
 	{
 		byte cmd[] = new byte[6];
 		
@@ -190,12 +185,12 @@ public class CommController implements CommRxInterface
 		hal.txData(cmd);
 		
 		Thread.sleep(50);
-		byte[] receivedData = hal.rxData();
+		//byte[] receivedData = hal.rxData();
 		
-		return checkOK(receivedData);
+		//return checkOK(receivedData);
 	}
 	
-	public boolean start() throws Exception
+	public void start() throws Exception
 	{
 		byte cmd[] = new byte[5];
 		
@@ -208,12 +203,12 @@ public class CommController implements CommRxInterface
 		hal.txData(cmd);
 		
 		Thread.sleep(50);
-		byte[] receivedData = hal.rxData();
+		//byte[] receivedData = hal.rxData();
 		
-		return checkOK(receivedData);
+		//return checkOK(receivedData);
 	}
 	
-	public boolean stop() throws Exception
+	public void stop() throws Exception
 	{
 		byte cmd[] = new byte[5];
 		
@@ -226,12 +221,12 @@ public class CommController implements CommRxInterface
 		hal.txData(cmd);
 		
 		Thread.sleep(50);
-		byte[] receivedData = hal.rxData();
+		//byte[] receivedData = hal.rxData();
 		
-		return checkOK(receivedData);
+		//return checkOK(receivedData);
 	}
 	
-	public boolean reset() throws Exception
+	public void reset() throws Exception
 	{
 		byte cmd[] = new byte[4];
 		
@@ -243,12 +238,12 @@ public class CommController implements CommRxInterface
 		hal.txData(cmd);
 		
 		Thread.sleep(50);
-		byte[] receivedData = hal.rxData();
+		//byte[] receivedData = hal.rxData();
 		
-		return checkOK(receivedData);
+		//return checkOK(receivedData);
 	}
 	
-	public byte[] setI2CSpeed(long speed) throws Exception
+	public void setI2CSpeed(long speed) throws Exception
 	{
 		byte cmd[] = new byte[8];
 		
@@ -264,9 +259,9 @@ public class CommController implements CommRxInterface
 		hal.txData(cmd);
 		
 		Thread.sleep(50);
-		byte[] receivedData = hal.rxData();
+		//byte[] receivedData = hal.rxData();
 		
-		return receivedData;
+		//return receivedData;
 	}
 	
 

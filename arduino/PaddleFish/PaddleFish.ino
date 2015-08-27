@@ -162,7 +162,7 @@ void pfControl()
                 i2c_speed += n2;
                 lwi2c.i2c_set_speed(i2c_speed);
                 
-                commOK();                
+                commOK(receivedCmd);                
                 startReceive = false;
                 receivedCmd = CMD_NULL;
               } else 
@@ -183,7 +183,7 @@ void pfControl()
                 else
                   setStream(true);
                 
-                commOK();
+                commOK(receivedCmd);
                 startReceive = false;
                 receivedCmd = CMD_NULL;
               } else 
@@ -201,7 +201,7 @@ void pfControl()
                 // Reset stream buffer
                 streamReset();
                 
-                commOK();
+                commOK(receivedCmd);
                 startReceive = false;
                 receivedCmd = CMD_NULL;
               } else 
@@ -220,7 +220,7 @@ void pfControl()
                 unsigned int period = ((buffer[0]<<8) + buffer[1]) & 0xFFFF;
                 setPeriod(period);
                 
-                commOK();
+                commOK(receivedCmd);
                 startReceive = false;
                 receivedCmd = CMD_NULL;
               } else 
@@ -238,7 +238,7 @@ void pfControl()
                 // Add command to stream buffer
                 streamAddCmd(buffer);
                 
-                commOK();
+                commOK(receivedCmd);
                 startReceive = false;
                 receivedCmd = CMD_NULL;
               } else 
@@ -257,6 +257,7 @@ void pfControl()
                 char* recBuf = pfReadBytes(buffer[0],buffer[1],buffer[2]);
                 
                 Serial.write(CMD_ANSWER);
+                Serial.write(receivedCmd); // echo command
                 // Send Data via UART
                 for (int dataCount = 0;dataCount<buffer[2];dataCount++)
                 {
@@ -288,9 +289,9 @@ void pfControl()
                     commError();
                     
                   if ( !lwi2c.get_last_error() )
-                    commOK();
+                    commOK(receivedCmd);
                   else
-                    commNOK();
+                    commOK(receivedCmd);
                   receivedCmd = CMD_NULL;
                   startReceive = false;
                 } else 
@@ -310,9 +311,9 @@ void pfControl()
                 sendData[0] = (buffer[3] & buffer[2]) | (~buffer[3] & recBuf[0]);
                 
                 if ( !lwi2c.get_last_error() )
-                    commOK();
+                    commOK(receivedCmd);
                   else
-                    commNOK();
+                    commNOK(receivedCmd);
                 
                 if ( !lwi2c.get_last_error() )
                   pfWriteBytes(buffer[0], buffer[1], 1, sendData);
@@ -454,19 +455,21 @@ void commError()
   // Error in UART communication
   receivedCmd = CMD_NULL;
   startReceive = false;
-  commNOK();
+  commOK(receivedCmd);
 }
 
-void commOK()
+void commOK(char command)
 {
-  Serial.write(CMD_ANSWER);                
+  Serial.write(CMD_ANSWER);
+  Serial.write(command);
   Serial.write(CMD_OK);
   Serial.write(CMD_END);
 }
 
-void commNOK()
+void commNOK(char command)
 {
-  Serial.write(CMD_ANSWER);                
+  Serial.write(CMD_ANSWER);
+  Serial.write(command);
   Serial.write((byte)CMD_NULL);
   Serial.write(CMD_ESC);
 }

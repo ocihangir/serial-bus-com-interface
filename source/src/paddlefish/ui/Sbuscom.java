@@ -42,7 +42,7 @@ public class Sbuscom implements CommRxInterface{
 			public void run() {
 				try {
 					//System.setOut(new PrintStream(new FileOutputStream("output.txt")));
-					commCont = CommController.getInstance();
+					commCont = new CommController();
 					
 					Sbuscom window = new Sbuscom();
 					window.frame.setVisible(true);
@@ -285,7 +285,7 @@ public class Sbuscom implements CommRxInterface{
 		StringBuilder stringBuild = new StringBuilder((data.length-2) * 2);
 		Formatter formatter = new Formatter(stringBuild);
 		// Get rid of start and end characters of the answer
-		for ( int i = 1; i<data.length-1; i++ )		
+		for ( int i = 0; i<data.length; i++ )		
 			formatter.format("%02x ", data[i]);
 		
 		formatter.close();
