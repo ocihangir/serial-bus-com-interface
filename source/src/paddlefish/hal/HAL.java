@@ -6,16 +6,16 @@ import java.util.List;
 
 import com.sun.corba.se.impl.orbutil.concurrent.Mutex;
 
-import paddlefish.protocol.CommController;
-
 import jssc.SerialPortException;
+
 
 /*Singleton class Pattern is used*/
 /*Observer Pattern is used*/
 public class HAL implements CommRxInterface {
 	private static HAL instance = null;
 	USB usbComm;
-	private List<CommRxInterface> receiverList = new ArrayList<CommRxInterface>();
+	private List<CommControllerInterface> dataReceiverList = new ArrayList<CommControllerInterface>();
+	private List<CommControllerInterface> commandReceiverList = new ArrayList<CommControllerInterface>();
 	private byte rxBuffer[] = new byte[1024];
 	private int rxBufferLength = 0;
 	Mutex mutex = new Mutex();
@@ -37,9 +37,14 @@ public class HAL implements CommRxInterface {
 	      return instance;
 	}
 	
-	public void addReceiver(CommRxInterface commRx)
+	public void addDataReceiver(CommControllerInterface commRx)
     {
-    	receiverList.add(commRx);
+		dataReceiverList.add(commRx);
+    }
+	
+	public void addCommandReceiver(CommControllerInterface commRx)
+    {
+		commandReceiverList.add(commRx);
     }
 	
 	public ArrayList<String> listAvailablePorts()
@@ -141,16 +146,25 @@ public class HAL implements CommRxInterface {
 		{
 			System.arraycopy(buffer, 0, rxBuffer, rxBufferLength, len);
 			rxBufferLength+=len;
-			if (rxBuffer[rxBufferLength-1] == 0x0C)
+			if ((byte)rxBuffer[rxBufferLength-1] == (byte)0x0C)
 			{
 				byte tempBuffer[] = new byte[rxBufferLength];
 				System.arraycopy(rxBuffer, 0, tempBuffer, 0, rxBufferLength);
-				// We need to categorize answers to let observers know 
-				for (CommRxInterface commRx : receiverList)
-		        	commRx.commReceiver(tempBuffer);
+				
+				if ((byte) rxBuffer[0] == (byte) 0xA7)
+				{
+					for (CommControllerInterface commRx : dataReceiverList)
+			        	commRx.commDataReceiver(tempBuffer);
+				}
+				
+				if ((byte) rxBuffer[0] == (byte) 0xA6)
+				{
+					for (CommControllerInterface commRx : commandReceiverList)
+			        	commRx.commCommandReceiver(tempBuffer);
+				}
 				
 				rxBufferLength = 0;
-			} else if (rxBuffer[rxBufferLength] == 0x0E)
+			} else if ((byte)rxBuffer[rxBufferLength] == (byte)0x0E)
 			{
 				try {
 					throw new Exception("I2C Error! Check if I2C device connected properly. Slow down the I2C speed from Advanced tab.");

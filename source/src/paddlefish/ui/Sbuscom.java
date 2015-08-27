@@ -9,7 +9,7 @@ import java.util.Formatter;
 
 import javax.swing.JFrame;
 
-import paddlefish.hal.CommRxInterface;
+import paddlefish.hal.CommControllerInterface;
 import paddlefish.protocol.CommController;
 
 import javax.swing.DefaultListModel;
@@ -23,7 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JTextArea;
 
-public class Sbuscom implements CommRxInterface{
+public class Sbuscom implements CommControllerInterface{
 
 	private JFrame frame;
 	private JButton btnConnect;
@@ -269,7 +269,8 @@ public class Sbuscom implements CommRxInterface{
 		
 		frame.getContentPane().add(tabbedPane);
 		
-		commCont.addReceiver(this);
+		commCont.addDataReceiver(this);
+		commCont.addCommandReceiver(this);
 		
 	}
 	
@@ -346,8 +347,14 @@ public class Sbuscom implements CommRxInterface{
 	}
 
 	@Override
-	public void commReceiver(byte[] buffer) {
+	public void commDataReceiver(byte[] buffer) {
 		// TODO Auto-generated method stub
-		flowModel.addElement(txtI2C.getText() + "  |  " + txtReg.getText() + "   |   " + buffer.length + "   |  <  | " + hex2str(buffer));
+		flowModel.addElement("DATA" + txtI2C.getText() + "  |  " + txtReg.getText() + "   |   " + buffer.length + "   |  <  | " + hex2str(buffer));
+	}
+	
+	@Override
+	public void commCommandReceiver(byte[] buffer) {
+		// TODO Auto-generated method stub
+		flowModel.addElement("CMD" + txtI2C.getText() + "  |  " + txtReg.getText() + "   |   " + buffer.length + "   |  <  | " + hex2str(buffer));
 	}
 }

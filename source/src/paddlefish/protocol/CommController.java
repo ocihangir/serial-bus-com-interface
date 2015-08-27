@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jssc.SerialPortException;
+import paddlefish.hal.CommControllerInterface;
 import paddlefish.hal.CommRxInterface;
 import paddlefish.hal.HAL;
 import paddlefish.protocol.CommConstants;
@@ -11,38 +12,29 @@ import paddlefish.protocol.CommConstants;
 
 
 /*Observer Pattern is used*/
-public class CommController implements CommRxInterface
+public class CommController implements CommControllerInterface
 {
-	//private static CommController instance = null;
 	private static HAL hal;
 	
-	private List<CommRxInterface> receiverList = new ArrayList<CommRxInterface>();
+	private List<CommControllerInterface> dataReceiverList = new ArrayList<CommControllerInterface>();
+	private List<CommControllerInterface> commandReceiverList = new ArrayList<CommControllerInterface>();
 	
 	public CommController() throws Exception 
 	{
 		 if(hal==null)
 			hal = HAL.getInstance();
-		 hal.addReceiver(this);
+		 hal.addDataReceiver(this);
+		 hal.addCommandReceiver(this);
 	}
-	   
-
-    /*public static CommController getInstance() throws Exception {
-	      if(instance == null) 
-	      {
-	         instance = new CommController();
-	      }
-	      return instance;
-	}*/
     
-    public void addReceiver(CommRxInterface commRx)
+    public void addDataReceiver(CommControllerInterface commRx)
     {
-    	receiverList.add(commRx);
+    	dataReceiverList.add(commRx);
     }
     
-    public void commReceived(byte[] receivedMessage)
+    public void addCommandReceiver(CommControllerInterface commRx)
     {
-        for (CommRxInterface commRx : receiverList)
-        	commRx.commReceiver(receivedMessage);
+    	commandReceiverList.add(commRx);
     }
     
     public boolean isConnected()
@@ -278,15 +270,23 @@ public class CommController implements CommRxInterface
 	
 	private static boolean checkOK(byte ans[])
 	{
-		if ( (ans[0] != CommConstants.CMD_START) || (ans[1] != CommConstants.CMD_OK) || (ans[2] != CommConstants.CMD_END))
+		if ( (ans[0] != CommConstants.CMD_START) || (ans[2] != CommConstants.CMD_OK) || (ans[3] != CommConstants.CMD_END))
 			return false;
 		return true;
 	}
 
+	@Override
+	public void commCommandReceiver(byte[] receivedMessage) {
+		// TODO Auto-generated method stub
+		for (CommControllerInterface commRx : commandReceiverList)
+        	commRx.commCommandReceiver(receivedMessage);
+	}
+
 
 	@Override
-	public void commReceiver(byte[] receivedMessage) {
-		for (CommRxInterface commRx : receiverList)
-        	commRx.commReceiver(receivedMessage);
+	public void commDataReceiver(byte[] receivedMessage) {
+		// TODO Auto-generated method stub
+		for (CommControllerInterface commRx : dataReceiverList)
+        	commRx.commDataReceiver(receivedMessage);
 	}
 }

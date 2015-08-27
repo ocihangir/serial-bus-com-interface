@@ -23,6 +23,7 @@
 // basic
 #define CMD_START 0xA5
 #define CMD_ANSWER 0xA6
+#define CMD_DATA_ANSWER 0xA7
 #define CMD_NULL 0x00
 #define CMD_END 0x0C
 #define CMD_ESC 0x0E
@@ -256,7 +257,7 @@ void pfControl()
                 // Read data from i2c device
                 char* recBuf = pfReadBytes(buffer[0],buffer[1],buffer[2]);
                 
-                Serial.write(CMD_ANSWER);
+                Serial.write(CMD_DATA_ANSWER);
                 Serial.write(receivedCmd); // echo command
                 // Send Data via UART
                 for (int dataCount = 0;dataCount<buffer[2];dataCount++)
