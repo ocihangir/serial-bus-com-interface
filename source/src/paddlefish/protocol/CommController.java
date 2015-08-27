@@ -5,7 +5,6 @@ import java.util.List;
 
 import jssc.SerialPortException;
 import paddlefish.hal.CommControllerInterface;
-import paddlefish.hal.CommRxInterface;
 import paddlefish.hal.HAL;
 import paddlefish.protocol.CommConstants;
 
@@ -268,13 +267,6 @@ public class CommController implements CommControllerInterface
 			System.out.println("No HAL available");
 	}
 	
-	private static boolean checkOK(byte ans[])
-	{
-		if ( (ans[0] != CommConstants.CMD_START) || (ans[2] != CommConstants.CMD_OK) || (ans[3] != CommConstants.CMD_END))
-			return false;
-		return true;
-	}
-
 	@Override
 	public void commCommandReceiver(byte[] receivedMessage) {
 		// TODO Auto-generated method stub

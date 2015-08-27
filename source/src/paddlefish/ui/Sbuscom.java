@@ -10,6 +10,7 @@ import java.util.Formatter;
 import javax.swing.JFrame;
 
 import paddlefish.hal.CommControllerInterface;
+import paddlefish.protocol.CommConstants;
 import paddlefish.protocol.CommController;
 
 import javax.swing.DefaultListModel;
@@ -354,7 +355,19 @@ public class Sbuscom implements CommControllerInterface{
 	
 	@Override
 	public void commCommandReceiver(byte[] buffer) {
-		// TODO Auto-generated method stub
-		flowModel.addElement("CMD" + txtI2C.getText() + "  |  " + txtReg.getText() + "   |   " + buffer.length + "   |  <  | " + hex2str(buffer));
+		// TODO Auto-generated method stub		
+		if ( !checkOK(buffer) )
+			lblShowStat.setText("I2C Error! Check if I2C device connected properly. Slow down the I2C speed from Advanced tab.");
+		else
+			lblShowStat.setText("OK");
+		
+		// flowModel.addElement("CMD" + txtI2C.getText() + "  |  " + txtReg.getText() + "   |   " + buffer.length + "   |  <  | " + hex2str(buffer));
+	}
+	
+	private static boolean checkOK(byte ans[])
+	{
+		if ( ((byte)ans[0] != (byte)CommConstants.CMD_ANSWER) || ((byte)ans[2] != (byte)CommConstants.CMD_OK) || ((byte)ans[3] != (byte)CommConstants.CMD_END))
+			return false;
+		return true;
 	}
 }
