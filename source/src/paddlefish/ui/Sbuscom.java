@@ -41,6 +41,8 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 	DefaultListModel<String> streamFlowModel = null;
 	DefaultListModel<String> streamDeviceFlowModel = null;
 	
+	JTabbedPane tabbedPane;
+	
 	long tmptime = 0;
 
 	/**
@@ -79,9 +81,26 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
-		JTabbedPane tabbedPane = new JTabbedPane();
+		tabbedPane = new JTabbedPane();
 				
+		initBasicTab();
 		
+		initAdvancedTab();
+		
+		// initStreamTab();
+
+		
+		frame.getContentPane().add(tabbedPane);
+		
+		commCont.addDataReceiver(this);
+		commCont.addCommandReceiver(this);
+		
+		commStreamer.addStreamReceiver(this);
+		
+	}
+	
+	private void initBasicTab()
+	{
 		JPanel panelBasic = new JPanel(false);
 		
 		tabbedPane.addTab("Basic", panelBasic);
@@ -183,8 +202,8 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 					String[] splitData = txtData.getText().split(" ");
 					byte data[] = new byte[splitData.length];
 					for (int i=0;i<splitData.length;i++)
-						data[i] = (byte) str2hex(splitData[i]);
-					commCont.writeByteArray(str2hex(txtI2C.getText()), str2hex(txtReg.getText()), data.length, data);
+						data[i] = (byte) Conversion.str2hex(splitData[i]);
+					commCont.writeByteArray(Conversion.str2hex(txtI2C.getText()), Conversion.str2hex(txtReg.getText()), data.length, data);
 					flowModel.addElement(txtI2C.getText() + "  |  " + txtReg.getText() + "   |  " + data.length + "    |  >  | " + txtData.getText());
 					lblShowStat.setText("OK");
 				} catch (Exception e) {
@@ -206,7 +225,7 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 			public void actionPerformed(ActionEvent event) {
 				try {
 					int len = Integer.parseInt(txtLength.getText());
-					commCont.readByteArray(str2hex(txtI2C.getText()), str2hex(txtReg.getText()), len);
+					commCont.readByteArray(Conversion.str2hex(txtI2C.getText()), Conversion.str2hex(txtReg.getText()), len);
 					//flowModel.addElement(txtI2C.getText() + "  |  " + txtReg.getText() + "   |   " + len + "   |  <  | " + hex2str(data));
 					lblShowStat.setText("OK");
 				} catch (Exception e) {
@@ -238,7 +257,10 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 			}
 	    });
 		
-		
+	}
+	
+	private void initAdvancedTab()
+	{
 		JPanel panelAdvanced = new JPanel(false);
 		
 		tabbedPane.addTab("Advanced", panelAdvanced);
@@ -274,7 +296,10 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 				
 			}
 	    });
-		
+	}
+	
+	private void initStreamTab()
+	{
 		JPanel panelStream = new JPanel(false);
 		
 		tabbedPane.addTab("Stream", panelStream);
@@ -346,7 +371,7 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 					int period = Integer.parseInt(txtPeriod.getText().trim());
 					int len = Integer.parseInt(txtLengthStream.getText());
 					commStreamer.setPeriod(period);
-					commStreamer.addDevice(str2hex(txtI2CStream.getText()), str2hex(txtRegStream.getText()), len, period);
+					commStreamer.addDevice(Conversion.str2hex(txtI2CStream.getText()), Conversion.str2hex(txtRegStream.getText()), len, period);
 					streamDeviceFlowModel.addElement("I2C:" + txtI2CStream.getText() + " Reg:" + txtRegStream.getText() + " Len:" + txtLengthStream.getText());
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -425,15 +450,6 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 		scrStreamDataList.setPreferredSize(new Dimension(250, 250));
 		scrStreamDataList.setBounds(350, 45, 267, 415);
 		panelStream.add(scrStreamDataList);
-
-		
-		frame.getContentPane().add(tabbedPane);
-		
-		commCont.addDataReceiver(this);
-		commCont.addCommandReceiver(this);
-		
-		commStreamer.addStreamReceiver(this);
-		
 	}
 	
 	private void listPortsToComboBox(JComboBox<String> comboBox)
@@ -443,74 +459,11 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 			comboBox.addItem(portList.get(i));
 	}
 	
-	private String hex2str(byte[] data)
-	{
-		StringBuilder stringBuild = new StringBuilder((data.length-2) * 2);
-		Formatter formatter = new Formatter(stringBuild);
-		// Get rid of start and end characters of the answer
-		for ( int i = 0; i<data.length; i++ )		
-			formatter.format("%02x ", data[i]);
-		
-		formatter.close();
-				
-		return stringBuild.toString().toUpperCase();
-	}
 	
-	private byte str2hex(String str) throws Exception
-	{
-		// TODO : accept 0xFFF format				
-		if ( str.length() > 2 )
-			throw (new Exception("Hex number must be in FF format!"));
-		
-		str = str.toUpperCase();
-		
-		byte res = 0;
-		
-		for ( int i = 0; i < str.length(); i++)
-		{
-			switch ( str.charAt(i) )
-			{
-				case '0':
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-				case '6':
-				case '7':
-				case '8':
-				case '9':
-					res |= (byte) (Character.getNumericValue(str.charAt(i)) << (4 * ( str.length() - i - 1 ) ));
-					break;
-				case 'A':
-					res |= (byte) (10 << (4 * ( str.length() - i - 1 ) ));
-					break;
-				case 'B':
-					res |= (byte) (11 << (4 * ( str.length() - i - 1 ) ));
-					break;
-				case 'C':
-					res |= (byte) (12 << (4 * ( str.length() - i - 1 ) ));
-					break;
-				case 'D':
-					res |= (byte) (13 << (4 * ( str.length() - i - 1 ) ));
-					break;
-				case 'E':
-					res |= (byte) (14 << (4 * ( str.length() - i - 1 ) ));
-					break;
-				case 'F':
-					res |= (byte) (15 << (4 * ( str.length() - i - 1 ) ));
-					break;
-				default:
-					throw (new Exception("Not a hex number!"));
-			}
-		}
-		
-		return res;
-	}
 
 	@Override
 	public void commDataReceiver(byte[] buffer) {
-		flowModel.addElement(txtI2C.getText() + "  |  " + txtReg.getText() + "   |   " + buffer.length + "   |  <  | " + hex2str(buffer));
+		flowModel.addElement(txtI2C.getText() + "  |  " + txtReg.getText() + "   |   " + (buffer.length-3) + "   |  <  | " + Conversion.hex2str(buffer));
 	}
 	
 	@Override
@@ -520,7 +473,14 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 		else
 			lblShowStat.setText("OK");		
 		
-		flowModel.addElement("CMD:" + hex2str(buffer));
+		//flowModel.addElement("CMD:" + hex2str(buffer));
+	}
+
+	@Override
+	public void streamReceiver(byte[] buffer) {
+		long timestamp = (buffer[1] << 0) + (buffer[2] << 8) + (buffer[3] << 16) + (buffer[4] << 24);
+		streamFlowModel.addElement(timestamp + ":" + Conversion.hex2str(buffer) + ":" + (tmptime-System.nanoTime())/1000000);
+		tmptime = System.nanoTime();
 	}
 	
 	private static boolean checkOK(byte ans[])
@@ -528,12 +488,5 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 		if ( ((byte)ans[0] != (byte)CommConstants.CMD_ANSWER) || ((byte)ans[2] != (byte)CommConstants.CMD_OK) || ((byte)ans[3] != (byte)CommConstants.CMD_END))
 			return false;
 		return true;
-	}
-
-	@Override
-	public void streamReceiver(byte[] buffer) {
-		long timestamp = (buffer[1] << 0) + (buffer[2] << 8) + (buffer[3] << 16) + (buffer[4] << 24);
-		streamFlowModel.addElement(timestamp + ":" + hex2str(buffer) + ":" + (tmptime-System.nanoTime())/1000000);
-		tmptime = System.nanoTime();
 	}
 }
