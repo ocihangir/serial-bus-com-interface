@@ -41,6 +41,7 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 	DefaultListModel<String> streamFlowModel = null;
 	DefaultListModel<String> streamDeviceFlowModel = null;
 	
+	long tmptime = 0;
 
 	/**
 	 * Launch the application.
@@ -531,7 +532,8 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 
 	@Override
 	public void streamReceiver(byte[] buffer) {
-		// TODO Auto-generated method stub
-		streamFlowModel.addElement(hex2str(buffer));
+		long timestamp = (buffer[1] << 0) + (buffer[2] << 8) + (buffer[3] << 16) + (buffer[4] << 24);
+		streamFlowModel.addElement(timestamp + ":" + hex2str(buffer) + ":" + (tmptime-System.nanoTime())/1000000);
+		tmptime = System.nanoTime();
 	}
 }
