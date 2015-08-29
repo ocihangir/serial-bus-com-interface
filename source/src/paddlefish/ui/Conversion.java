@@ -8,7 +8,7 @@ public class Conversion {
 		StringBuilder stringBuild = new StringBuilder((data.length-2) * 2);
 		Formatter formatter = new Formatter(stringBuild);
 		// Get rid of start and end characters of the answer
-		for ( int i = 2; i<data.length-1; i++ )		
+		for ( int i = 0; i<data.length; i++ )		
 			formatter.format("%02x ", data[i]);
 		
 		formatter.close();

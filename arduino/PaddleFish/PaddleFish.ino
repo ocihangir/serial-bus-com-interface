@@ -258,12 +258,19 @@ void pfControl()
                 char* recBuf = pfReadBytes(buffer[0],buffer[1],buffer[2]);
                 
                 Serial.write(CMD_DATA_ANSWER);
+                if (!lwi2c.get_last_error())
+                  Serial.write(buffer[2]+3);
+                else
+                  Serial.write(1+3);
+                  
                 Serial.write(receivedCmd); // echo command
                 // Send Data via UART
                 for (int dataCount = 0;dataCount<buffer[2];dataCount++)
                 {
                   Serial.write(recBuf[dataCount]);
                 }
+                char CRC = 0x00;
+                Serial.write(CRC);
                 if ( !lwi2c.get_last_error() )
                   Serial.write(CMD_END);
                 else
@@ -292,7 +299,7 @@ void pfControl()
                   if ( !lwi2c.get_last_error() )
                     commOK(receivedCmd);
                   else
-                    commOK(receivedCmd);
+                    commNOK(receivedCmd);
                   receivedCmd = CMD_NULL;
                   startReceive = false;
                 } else 
@@ -340,11 +347,14 @@ void streamAddCmd(char *buffer)
   for (int i=0;i<5;i++)
     streamCmdArray[start+i]=buffer[i];
   streamCmdArray[0]++;
+  
+  streamCmdArray[1]+=buffer[2]; // hold total number of bytes in this register
 }
 
 void streamReset()
 {
   streamCmdArray[0]=0;
+  streamCmdArray[1]=0;
 }
 
 void setPeriod(unsigned int period)
@@ -370,11 +380,16 @@ void setStream(boolean ON)
 */
 void heartBeat()
 {
+  //char buff[streamCmdArray[1]+1+4+2]
   
-  /*char* recBuf = pfReadBytes(0x53,0x32,1);
-  Serial.print("read buffer: ");
-  Serial.println(recBuf[0],DEC);*/
+  /*buff[0] = CMD_STREAM_START;
+  buff[1] = time & 0xFF;
+  buff[2] = (time>>8) & 0xFF;
+  buff[3] = (time>>16) & 0xFF;
+  buff[4] = (time>>24) & 0xFF;*/
+  
   Serial.write(CMD_STREAM_START);
+  Serial.write(streamCmdArray[1]+4+2);
   
   // Send 4 bytes timestamp
   time = millis(); // long
@@ -383,17 +398,24 @@ void heartBeat()
   Serial.write((time>>16) & 0xFF);
   Serial.write((time>>24) & 0xFF);  
   // Send device data
+  //int j=0;
   for (int dev=0;dev<streamCmdArray[0];dev++)
   {
     int start = 5 + (dev * STREAM_LENGTH);
     char* recBuf = pfReadBytes(streamCmdArray[start],streamCmdArray[start+1],streamCmdArray[start+2]);
+    //for (int=0;i<streamCmdArray[start+2];i++)
+      //buff[5+i+j] = recBuf[i];
+    //j=j+streamCmdArray[start+2];
     Serial.write(recBuf);
   }
   
   char CRC = 0x00;
+  //buff[5+j]=CRC;
+  //buff[5+j+1]=CMD_STREAM_END;
+  //Serial.write(buff);
   Serial.write(CRC);
   Serial.write(CMD_STREAM_END);
-  blinkLed();
+  //blinkLed();
 }
 
 /*
@@ -417,6 +439,9 @@ char* pfReadBytes(char devAddress, char regAddress, char length)
   /*if (!lwi2c.get_last_error())
     return sendNull;*/
   lwi2c.i2c_stop();
+  
+  if (0x00 != lwi2c.get_last_error())
+    return sendNull;
   
   return receiveBuffer;
 }
@@ -462,6 +487,7 @@ void commError()
 void commOK(char command)
 {
   Serial.write(CMD_ANSWER);
+  Serial.write(3);
   Serial.write(command);
   Serial.write(CMD_OK);
   Serial.write(CMD_END);
@@ -470,6 +496,7 @@ void commOK(char command)
 void commNOK(char command)
 {
   Serial.write(CMD_ANSWER);
+  Serial.write(3);
   Serial.write(command);
   Serial.write((byte)CMD_NULL);
   Serial.write(CMD_ESC);

@@ -8,6 +8,8 @@ import com.sun.corba.se.impl.orbutil.concurrent.Mutex;
 
 import jssc.SerialPortException;
 
+import paddlefish.protocol.CommConstants;
+
 
 /*Singleton class Pattern is used*/
 /*Observer Pattern is used*/
@@ -146,13 +148,79 @@ public class HAL implements CommRxInterface {
 	@Override
 	public void commReceiver(byte[] buffer) {
 		int len = 0;
+		byte tempBuffer[] = null;
+		
 		len = buffer.length;
 			
 		if (len>0)
 		{
 			System.arraycopy(buffer, 0, rxBuffer, rxBufferLength, len);
 			rxBufferLength+=len;
-			if ((byte)rxBuffer[rxBufferLength-1] == (byte)0x0C)
+			int lastPos=0;
+			for (int i = 0; i < rxBufferLength;i++)
+			{
+				if (((byte)rxBuffer[i] == (byte)CommConstants.CMD_ANSWER) || ((byte)rxBuffer[i] == (byte)CommConstants.CMD_DATA_ANSWER) || ((byte)rxBuffer[i] == (byte)CommConstants.CMD_STREAM_START))
+				{
+					// Start character detected
+					if (rxBufferLength>i+1) // Check length exists
+					{
+						if (rxBufferLength>=i+1+(int)rxBuffer[i+1]) // Check there are enough characters in the buffer
+						{
+							lastPos = i+1+(int)rxBuffer[i+1];
+							if (((byte)rxBuffer[lastPos] == (byte)CommConstants.CMD_ESC) || ((byte)rxBuffer[lastPos] == (byte)CommConstants.CMD_END) || ((byte)rxBuffer[lastPos] == (byte)CommConstants.CMD_STREAM_END))  
+							{
+								tempBuffer = new byte[lastPos-i+1];
+								System.arraycopy(rxBuffer, i, tempBuffer, 0, lastPos-i+1);
+								break;
+							}
+						}
+					}
+				}
+				
+			}
+			
+			if (tempBuffer != null)
+			{
+				// TODO : check CRC here
+				
+				if ((byte)tempBuffer[0] == (byte)CommConstants.CMD_ANSWER)
+				{
+					if ((byte)tempBuffer[tempBuffer.length-1] == (byte)CommConstants.CMD_END)
+					{
+						for (CommControllerInterface commRx : commandReceiverList)
+				        	commRx.commCommandReceiver(tempBuffer);
+					}
+					
+				} else if ((byte)tempBuffer[0] == (byte)CommConstants.CMD_DATA_ANSWER)
+				{
+					if ((byte)tempBuffer[tempBuffer.length-1] == (byte)CommConstants.CMD_END)
+					{
+						for (CommControllerInterface commRx : dataReceiverList)
+				        	commRx.commDataReceiver(tempBuffer);
+					}
+				} else if  ((byte)tempBuffer[0] == (byte)CommConstants.CMD_STREAM_START)
+				{
+					if ((byte)tempBuffer[tempBuffer.length-1] == (byte)CommConstants.CMD_STREAM_END)
+					{
+						for (CommStreamerInterface commRx : streamReceiverList)
+				        	commRx.streamReceiver(tempBuffer);
+					}
+				}
+				
+				// Refresh array with remaining data
+				if (rxBufferLength<=lastPos)
+					rxBufferLength=0;
+				else
+				{
+					int remainingCount = rxBufferLength-(lastPos+1);
+					System.arraycopy(rxBuffer, lastPos+1, rxBuffer, 0, remainingCount);
+					rxBufferLength = remainingCount;
+				}
+			}
+			
+			
+			
+			/*if ((byte)rxBuffer[rxBufferLength-1] == (byte)0x0C)
 			{
 				byte tempBuffer[] = new byte[rxBufferLength];
 				System.arraycopy(rxBuffer, 0, tempBuffer, 0, rxBufferLength);

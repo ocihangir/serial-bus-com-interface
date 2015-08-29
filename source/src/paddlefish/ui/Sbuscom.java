@@ -5,8 +5,6 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Formatter;
-
 import javax.swing.JFrame;
 
 import paddlefish.hal.CommControllerInterface;
@@ -87,7 +85,7 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 		
 		initAdvancedTab();
 		
-		// initStreamTab();
+		initStreamTab();
 
 		
 		frame.getContentPane().add(tabbedPane);
@@ -367,10 +365,9 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				
-				try {
+				try {					
 					int period = Integer.parseInt(txtPeriod.getText().trim());
-					int len = Integer.parseInt(txtLengthStream.getText());
-					commStreamer.setPeriod(period);
+					int len = Integer.parseInt(txtLengthStream.getText());					
 					commStreamer.addDevice(Conversion.str2hex(txtI2CStream.getText()), Conversion.str2hex(txtRegStream.getText()), len, period);
 					streamDeviceFlowModel.addElement("I2C:" + txtI2CStream.getText() + " Reg:" + txtRegStream.getText() + " Len:" + txtLengthStream.getText());
 				} catch (Exception e) {
@@ -409,6 +406,8 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 			public void actionPerformed(ActionEvent event) {
 				
 				try {
+					int period = Integer.parseInt(txtPeriod.getText().trim());
+					commStreamer.setPeriod(period);
 					commStreamer.start();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -473,7 +472,7 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 		else
 			lblShowStat.setText("OK");		
 		
-		//flowModel.addElement("CMD:" + hex2str(buffer));
+		flowModel.addElement("CMD:" + Conversion.hex2str(buffer));
 	}
 
 	@Override
@@ -485,7 +484,7 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 	
 	private static boolean checkOK(byte ans[])
 	{
-		if ( ((byte)ans[0] != (byte)CommConstants.CMD_ANSWER) || ((byte)ans[2] != (byte)CommConstants.CMD_OK) || ((byte)ans[3] != (byte)CommConstants.CMD_END))
+		if ( ((byte)ans[0] != (byte)CommConstants.CMD_ANSWER) || ((byte)ans[3] != (byte)CommConstants.CMD_OK) || ((byte)ans[4] != (byte)CommConstants.CMD_END))
 			return false;
 		return true;
 	}
