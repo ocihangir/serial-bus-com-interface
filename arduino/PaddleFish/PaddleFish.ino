@@ -343,7 +343,7 @@ void pfControl()
 
 void streamAddCmd(char *buffer)
 {
-  int start = streamCmdArray[0]*STREAM_LENGTH+5;
+  int start = ((int)streamCmdArray[0]*STREAM_LENGTH)+5;
   for (int i=0;i<5;i++)
     streamCmdArray[start+i]=buffer[i];
   streamCmdArray[0]++;
@@ -380,14 +380,6 @@ void setStream(boolean ON)
 */
 void heartBeat()
 {
-  //char buff[streamCmdArray[1]+1+4+2]
-  
-  /*buff[0] = CMD_STREAM_START;
-  buff[1] = time & 0xFF;
-  buff[2] = (time>>8) & 0xFF;
-  buff[3] = (time>>16) & 0xFF;
-  buff[4] = (time>>24) & 0xFF;*/
-  
   Serial.write(CMD_STREAM_START);
   Serial.write(streamCmdArray[1]+4+2);
   
@@ -398,21 +390,15 @@ void heartBeat()
   Serial.write((time>>16) & 0xFF);
   Serial.write((time>>24) & 0xFF);  
   // Send device data
-  //int j=0;
   for (int dev=0;dev<streamCmdArray[0];dev++)
   {
     int start = 5 + (dev * STREAM_LENGTH);
     char* recBuf = pfReadBytes(streamCmdArray[start],streamCmdArray[start+1],streamCmdArray[start+2]);
-    //for (int=0;i<streamCmdArray[start+2];i++)
-      //buff[5+i+j] = recBuf[i];
-    //j=j+streamCmdArray[start+2];
-    Serial.write(recBuf);
+    for (int i=0;i<streamCmdArray[start+2];i++)
+      Serial.write(recBuf[i]);
   }
   
   char CRC = 0x00;
-  //buff[5+j]=CRC;
-  //buff[5+j+1]=CMD_STREAM_END;
-  //Serial.write(buff);
   Serial.write(CRC);
   Serial.write(CMD_STREAM_END);
   //blinkLed();
@@ -427,17 +413,9 @@ char* pfReadBytes(char devAddress, char regAddress, char length)
   char* sendNull = {0x00};
   sendData[0]=regAddress;
   lwi2c.i2c_start();
-  /*if (!lwi2c.get_last_error())
-    return sendNull;*/
   lwi2c.i2c_write(devAddress,1,(char*)sendData);
-  /*if (!lwi2c.get_last_error())
-    return sendNull;*/
   lwi2c.i2c_repeated_start();
-  /*if (!lwi2c.get_last_error())
-    return sendNull;*/
   char* receiveBuffer = lwi2c.i2c_read(devAddress,length);
-  /*if (!lwi2c.get_last_error())
-    return sendNull;*/
   lwi2c.i2c_stop();
   
   if (0x00 != lwi2c.get_last_error())
@@ -500,21 +478,6 @@ void commNOK(char command)
   Serial.write(command);
   Serial.write((byte)CMD_NULL);
   Serial.write(CMD_ESC);
-}
-
-void disableInterrupt()
-{
-  /*Timer1.detachInterrupt();
-  Timer1.stop();*/
-}
-
-void enableInterrupt(long period)
-{
-  /*Timer1.initialize(period);
-  
-  // attach timer interrupt
-  Timer1.attachInterrupt(heartBeat);*/
-
 }
 
 boolean receiveBytes(int length,char* buffer)
