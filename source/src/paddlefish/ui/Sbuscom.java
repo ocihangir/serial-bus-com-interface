@@ -462,7 +462,9 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 
 	@Override
 	public void commDataReceiver(byte[] buffer) {
-		flowModel.addElement(txtI2C.getText() + "  |  " + txtReg.getText() + "   |   " + (buffer.length-3) + "   |  <  | " + Conversion.hex2str(buffer));
+		byte[] tmpBuffer = new byte[buffer.length-5];
+		System.arraycopy(buffer, 3, tmpBuffer, 0, buffer.length-5);
+		flowModel.addElement(txtI2C.getText() + "  |  " + txtReg.getText() + "   |   " + tmpBuffer.length + "   |  <  | " + Conversion.hex2str(tmpBuffer));
 	}
 	
 	@Override
@@ -472,7 +474,7 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 		else
 			lblShowStat.setText("OK");		
 		
-		flowModel.addElement("CMD:" + Conversion.hex2str(buffer));
+		//flowModel.addElement("CMD:" + Conversion.hex2str(buffer));
 	}
 
 	@Override

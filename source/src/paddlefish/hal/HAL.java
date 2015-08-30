@@ -217,53 +217,6 @@ public class HAL implements CommRxInterface {
 					rxBufferLength = remainingCount;
 				}
 			}
-			
-			
-			
-			/*if ((byte)rxBuffer[rxBufferLength-1] == (byte)0x0C)
-			{
-				byte tempBuffer[] = new byte[rxBufferLength];
-				System.arraycopy(rxBuffer, 0, tempBuffer, 0, rxBufferLength);
-				
-				if ((byte) rxBuffer[0] == (byte) 0xA7)
-				{
-					for (CommControllerInterface commRx : dataReceiverList)
-			        	commRx.commDataReceiver(tempBuffer);
-				}
-				
-				if ((byte) rxBuffer[0] == (byte) 0xA6)
-				{
-					for (CommControllerInterface commRx : commandReceiverList)
-			        	commRx.commCommandReceiver(tempBuffer);
-				}
-				
-				rxBufferLength = 0;
-			} else if ((byte)rxBuffer[rxBufferLength-1] == (byte)0xBD)
-			{
-				byte tempBuffer[] = new byte[rxBufferLength];
-				System.arraycopy(rxBuffer, 0, tempBuffer, 0, rxBufferLength);
-				if ((byte) rxBuffer[0] == (byte) 0xBE)
-				{
-					for (CommStreamerInterface commRx : streamReceiverList)
-			        	commRx.streamReceiver(tempBuffer);
-				}
-				rxBufferLength = 0;
-			} else if ((byte)rxBuffer[rxBufferLength] == (byte)0x0E)
-			{
-				try {
-					throw new Exception("I2C Error! Check if I2C device connected properly. Slow down the I2C speed from Advanced tab.");
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}/* else {
-				try {
-					throw new Exception("There is an answer from com device but doesn't end with a proper character!");
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}*/
 		}
 	}
 }

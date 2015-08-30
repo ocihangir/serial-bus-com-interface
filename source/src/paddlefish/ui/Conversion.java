@@ -5,9 +5,8 @@ import java.util.Formatter;
 public class Conversion {
 	public static String hex2str(byte[] data)
 	{
-		StringBuilder stringBuild = new StringBuilder((data.length-2) * 2);
+		StringBuilder stringBuild = new StringBuilder(data.length * 2);
 		Formatter formatter = new Formatter(stringBuild);
-		// Get rid of start and end characters of the answer
 		for ( int i = 0; i<data.length; i++ )		
 			formatter.format("%02x ", data[i]);
 		
