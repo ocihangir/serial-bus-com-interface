@@ -19,6 +19,7 @@ public class CommConstants {
 	public static final byte CMD_START = (byte) 0xA5;
 	public static final byte CMD_ANSWER = (byte) 0xA6;
 	public static final byte CMD_DATA_ANSWER = (byte) 0xA7;
+	public static final byte CMD_DATA_TEST = (byte) 0xAF;
 	public static final byte CMD_NULL = (byte) 0x00;
 	public static final byte CMD_END = (byte) 0x0C;
 	public static final byte CMD_ESC = (byte) 0x0E;

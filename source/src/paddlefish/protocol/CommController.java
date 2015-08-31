@@ -163,6 +163,25 @@ public class CommController implements CommControllerInterface
 		//return receivedData;
 	}
 	
+	
+	public void testData(byte length) throws Exception
+	{
+		byte cmd[] = new byte[5];
+		
+		cmd[0] = CommConstants.CMD_START;
+		cmd[1] = CommConstants.CMD_DATA_TEST;
+		cmd[2] = length;
+		cmd[3] = 0x00;
+		cmd[4] = CommConstants.CMD_END;
+		
+		hal.txData(cmd);
+		
+		Thread.sleep(50);
+		//byte[] receivedData = hal.rxData();
+		
+		//return receivedData;
+	}
+	
 
 	public void close()
 	{

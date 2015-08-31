@@ -151,11 +151,12 @@ public class HAL implements CommRxInterface {
 		byte tempBuffer[] = null;
 		
 		len = buffer.length;
-			
-		if (len>0)
+		System.arraycopy(buffer, 0, rxBuffer, rxBufferLength, len);
+		rxBufferLength+=len;
+		do //if (len>0)
 		{
-			System.arraycopy(buffer, 0, rxBuffer, rxBufferLength, len);
-			rxBufferLength+=len;
+			
+			
 			int lastPos=0;
 			for (int i = 0; i < rxBufferLength;i++)
 			{
@@ -164,9 +165,11 @@ public class HAL implements CommRxInterface {
 					// Start character detected
 					if (rxBufferLength>i+1) // Check length exists
 					{
-						if (rxBufferLength>=i+1+(int)rxBuffer[i+1]) // Check there are enough characters in the buffer
+						// Check there are enough characters in the buffer
+						if (rxBufferLength>=i+1+(int)rxBuffer[i+1])
 						{
 							lastPos = i+1+(int)rxBuffer[i+1];
+							// Check if last character is known
 							if (((byte)rxBuffer[lastPos] == (byte)CommConstants.CMD_ESC) || ((byte)rxBuffer[lastPos] == (byte)CommConstants.CMD_END) || ((byte)rxBuffer[lastPos] == (byte)CommConstants.CMD_STREAM_END))  
 							{
 								tempBuffer = new byte[lastPos-i+1];
@@ -215,8 +218,11 @@ public class HAL implements CommRxInterface {
 					int remainingCount = rxBufferLength-(lastPos+1);
 					System.arraycopy(rxBuffer, lastPos+1, rxBuffer, 0, remainingCount);
 					rxBufferLength = remainingCount;
+					tempBuffer = null;
 				}
+			} else {
+				break;
 			}
-		}
+		} while(rxBufferLength>0);
 	}
 }

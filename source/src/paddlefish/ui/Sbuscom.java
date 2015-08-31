@@ -294,6 +294,27 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 				
 			}
 	    });
+		
+		
+		JButton btnTestData = new JButton("Test Data");
+		btnTestData.setBounds(400, 45, 150, 24);
+		panelAdvanced.add(btnTestData);			
+		
+		btnTestData.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				
+				try {					
+					commCont.testData((byte)0x05);					
+					lblShowStat.setText("OK");
+				} catch (Exception e) {
+					e.printStackTrace();
+					lblShowStat.setText(e.getMessage());
+				}
+				
+			}
+	    });
+		
 	}
 	
 	private void initStreamTab()
@@ -474,7 +495,7 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 		else
 			lblShowStat.setText("OK");		
 		
-		//flowModel.addElement("CMD:" + Conversion.hex2str(buffer));
+		flowModel.addElement("CMD:" + Conversion.hex2str(buffer));
 	}
 
 	@Override

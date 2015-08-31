@@ -24,6 +24,7 @@
 #define CMD_START 0xA5
 #define CMD_ANSWER 0xA6
 #define CMD_DATA_ANSWER 0xA7
+#define CMD_DATA_TEST 0xAF
 #define CMD_NULL 0x00
 #define CMD_END 0x0C
 #define CMD_ESC 0x0E
@@ -146,7 +147,7 @@ void pfControl()
       else {
         
         switch (receivedCmd)
-        {
+        {          
           case CMD_SET_I2C_SPEED: /* |START|Cmd|Speed[4]|CRC|End| */ 
             if (Serial.available() > 1)
             {
@@ -328,6 +329,99 @@ void pfControl()
                   
                 receivedCmd = CMD_NULL;
                 startReceive = false;
+              } else 
+                commError();
+            }
+            break;
+          case CMD_DATA_TEST:
+             /* |START|Cmd|Length|CRC|End| */
+            if (Serial.available() > 2)
+            {
+              char buffer[3];
+              if (receiveBytes(3,buffer))
+              {
+                // First data set
+                Serial.write(CMD_ANSWER);
+                Serial.write(buffer[0]+3);
+                Serial.write(receivedCmd); // echo command
+                // Send Data via UART
+                for (int testData = 0;testData<buffer[0];testData++)
+                  Serial.write(testData);
+                  
+                char CRC = 0x00;
+                Serial.write(CRC);
+                Serial.write(CMD_END);
+                
+                // Second data set
+                Serial.write(CMD_ANSWER);
+                Serial.write(buffer[0]+3);
+                Serial.write(receivedCmd); // echo command
+                // Send Data via UART
+                for (int testData = 0;testData<buffer[0];testData++)
+                  Serial.write(testData);
+                  
+                CRC = 0x00;
+                Serial.write(CRC);
+                Serial.write(CMD_END);
+                
+                // Third data set
+                Serial.write(CMD_ANSWER);
+                Serial.write(buffer[0]+3);
+                Serial.write(receivedCmd); // echo command
+                
+                delay(300);
+                
+                // Send Data via UART
+                for (int testData = 0;testData<buffer[0];testData++)
+                  Serial.write(testData);
+                  
+                CRC = 0x00;
+                Serial.write(CRC);
+                Serial.write(CMD_END);
+                
+                delay(500);
+                
+                // Fourth data set
+                
+                Serial.write(CMD_ANSWER);
+                Serial.write(buffer[0]+3);
+                Serial.write(receivedCmd); // echo command
+                // Send Data via UART
+                for (int testData = 0;testData<buffer[0];testData++)
+                  Serial.write(testData);
+                  
+                CRC = 0x00;
+                Serial.write(CRC);
+                //Serial.write(CMD_END);
+                
+                // Fifth data set 
+                Serial.write(CMD_ANSWER);
+                Serial.write(buffer[0]+3);
+                Serial.write(receivedCmd); // echo command
+                // Send Data via UART
+                for (int testData = 0;testData<buffer[0];testData++)
+                  Serial.write(testData);
+                  
+                CRC = 0x00;
+                Serial.write(CRC);
+                Serial.write(CMD_END);
+                
+                delay(500);
+                
+                // Sixth data set
+                Serial.write(CMD_ANSWER);
+                Serial.write(buffer[0]+3);
+                Serial.write(receivedCmd); // echo command
+                // Send Data via UART
+                for (int testData = 0;testData<buffer[0];testData++)
+                  Serial.write(testData);
+                  
+                CRC = 0x00;
+                Serial.write(CRC);
+                Serial.write(CMD_END);
+                
+                startReceive = false;
+                receivedCmd = CMD_NULL;
               } else 
                 commError();
             }
