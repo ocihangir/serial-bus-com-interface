@@ -26,10 +26,15 @@ public class Conversion {
 		
 		if ( str.length() > 2 )
 		{
-			if ( 0 == str.compareToIgnoreCase("0x") )
+			String[] hexStr = str.split("X");
+			
+			if ( (hexStr.length < 2) || (hexStr.length > 2) )
 				throw (new Exception("Hex number must be in FF or 0xFF format!"));
 			
-			str = str.substring(2);
+			if ( !hexStr[0].equals("0") )
+				throw (new Exception("Hex number must be in FF or 0xFF format!"));
+			
+			str = hexStr[1];
 		}
 		
 		
