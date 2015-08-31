@@ -17,11 +17,22 @@ public class Conversion {
 	
 	public static byte str2hex(String str) throws Exception
 	{
-		// TODO : accept 0xFFF format				
-		if ( str.length() > 2 )
-			throw (new Exception("Hex number must be in FF format!"));
+		// TODO : accept 0xFFF format
 		
 		str = str.toUpperCase();
+		
+		if ( str.length() > 4 )
+			throw (new Exception("Hex number must be in FF or 0xFF format!"));
+		
+		if ( str.length() > 2 )
+		{
+			if ( 0 == str.compareToIgnoreCase("0x") )
+				throw (new Exception("Hex number must be in FF or 0xFF format!"));
+			
+			str = str.substring(2);
+		}
+		
+		
 		
 		byte res = 0;
 		
