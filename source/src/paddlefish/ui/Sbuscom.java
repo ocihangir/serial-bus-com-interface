@@ -379,7 +379,7 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 		txtPeriod.setText("1000");
 		
 		JButton btnAddStreamDevice = new JButton("Add");
-		btnAddStreamDevice.setBounds(30, 380, 80, 24);
+		btnAddStreamDevice.setBounds(30, 400, 120, 24);
 		panelStream.add(btnAddStreamDevice);			
 		
 		btnAddStreamDevice.addActionListener(new ActionListener(){
@@ -400,7 +400,7 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 	    });
 		
 		JButton btnResetStream = new JButton("Reset");
-		btnResetStream.setBounds(130, 380, 80, 24);
+		btnResetStream.setBounds(170, 400, 120, 24);
 		panelStream.add(btnResetStream);			
 		
 		btnResetStream.addActionListener(new ActionListener(){
@@ -419,7 +419,7 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 	    });
 		
 		JButton btnStartStream = new JButton("Start");
-		btnStartStream.setBounds(30, 410, 80, 24);
+		btnStartStream.setBounds(30, 430, 120, 24);
 		panelStream.add(btnStartStream);			
 		
 		btnStartStream.addActionListener(new ActionListener(){
@@ -439,7 +439,7 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 	    });
 		
 		JButton btnStopStream = new JButton("Stop");
-		btnStopStream.setBounds(130, 410, 80, 24);
+		btnStopStream.setBounds(170, 430, 120, 24);
 		panelStream.add(btnStopStream);			
 		
 		btnStopStream.addActionListener(new ActionListener(){
