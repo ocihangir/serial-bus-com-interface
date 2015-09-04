@@ -2,6 +2,7 @@ package paddlefish.ui;
 
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -127,6 +128,8 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 		txtI2C = new JTextPane();
 		txtI2C.setBounds(30, 105, 98, 21);
 		txtI2C.setToolTipText("One byte I2C Device Address. Can be found from device data sheet. Hex Format : 50");
+		txtI2C.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, null);
+		txtI2C.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
 		panelBasic.add(txtI2C);		
 		
 		JLabel lblRegisterAddress = new JLabel("Register Address :");
@@ -136,6 +139,8 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 		txtReg = new JTextPane();
 		txtReg.setBounds(30, 165, 98, 21);
 		txtReg.setToolTipText("One byte Device Register Address. Hex Format : 01");
+		txtReg.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, null);
+		txtReg.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
 		panelBasic.add(txtReg);
 		
 		JLabel lblLength = new JLabel("Data Length :");
@@ -145,6 +150,8 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 		final JTextPane txtLength = new JTextPane();
 		txtLength.setBounds(30, 225, 98, 21);
 		txtLength.setToolTipText("Number of bytes to be read starting from Register Address. Decimal value.");
+		txtLength.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, null);
+		txtLength.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
 		panelBasic.add(txtLength);
 		
 		JLabel lblData = new JLabel("Data :");
@@ -156,6 +163,8 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 		txtData.setLineWrap(true);
 		txtData.setWrapStyleWord(true);		
 		txtData.setToolTipText("Bytes to be read. Accepts multiple bytes. Hex Format : 00 11 22 33 44 55 ...");
+		txtData.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, null);
+		txtData.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
 		panelBasic.add(txtData);
 		
 		JScrollPane scrData = new JScrollPane(txtData);
@@ -272,6 +281,8 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 		txtI2CSpeed = new JTextPane();
 		txtI2CSpeed.setBounds(30, 45, 150, 24);
 		txtI2CSpeed.setToolTipText("A value between 500Hz~880000Hz");
+		txtI2CSpeed.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, null);
+		txtI2CSpeed.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
 		panelAdvanced.add(txtI2CSpeed);	
 		
 		JButton btnSetI2CSpeed = new JButton("Set");
@@ -332,6 +343,8 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 		final JTextPane txtI2CStream = new JTextPane();
 		txtI2CStream.setBounds(30, 320, 60, 21);
 		txtI2CStream.setToolTipText("One byte I2C Device Address. Can be found from device data sheet. Hex Format : 50");
+		txtI2CStream.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, null);
+		txtI2CStream.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
 		panelStream.add(txtI2CStream);		
 		
 		JLabel lblRegisterStreamAddress = new JLabel("Reg Addr :");
@@ -341,6 +354,8 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 		final JTextPane txtRegStream = new JTextPane();
 		txtRegStream.setBounds(130, 320, 60, 21);
 		txtRegStream.setToolTipText("One byte Device Register Address. Hex Format : 01");
+		txtRegStream.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, null);
+		txtRegStream.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
 		panelStream.add(txtRegStream);
 		
 		JLabel lblLengthStream = new JLabel("Length :");
@@ -350,6 +365,8 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 		final JTextPane txtLengthStream = new JTextPane();
 		txtLengthStream.setBounds(230, 320, 60, 21);
 		txtLengthStream.setToolTipText("Number of bytes to be read starting from Register Address. Decimal value.");
+		txtLengthStream.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, null);
+		txtLengthStream.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
 		panelStream.add(txtLengthStream);
 		
 		JLabel lblDeviceList = new JLabel("Stream Device List :");
@@ -374,6 +391,8 @@ public class Sbuscom implements CommControllerInterface, CommStreamerInterface{
 		final JTextPane txtPeriod = new JTextPane();
 		txtPeriod.setBounds(150, 357, 98, 21);
 		txtPeriod.setToolTipText("Stream Period in ms.");
+		txtPeriod.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, null);
+		txtPeriod.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, null);
 		panelStream.add(txtPeriod);
 		
 		txtPeriod.setText("1000");
