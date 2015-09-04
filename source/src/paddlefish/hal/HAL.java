@@ -166,9 +166,9 @@ public class HAL implements CommRxInterface {
 					if (rxBufferLength>i+1) // Check length exists
 					{
 						// Check there are enough characters in the buffer
-						if (rxBufferLength>=i+1+(int)rxBuffer[i+1])
+						if (rxBufferLength>=i+1+(int)(rxBuffer[i+1]&0xFF))
 						{
-							lastPos = i+1+(int)rxBuffer[i+1];
+							lastPos = i+1+(int)(rxBuffer[i+1]&0xFF);
 							// Check if last character is known
 							if (((byte)rxBuffer[lastPos] == (byte)CommConstants.CMD_ESC) || ((byte)rxBuffer[lastPos] == (byte)CommConstants.CMD_END) || ((byte)rxBuffer[lastPos] == (byte)CommConstants.CMD_STREAM_END))  
 							{

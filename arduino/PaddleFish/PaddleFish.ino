@@ -6,6 +6,8 @@
 //#define LEONARDO 1
 
 #define BAUDRATE 115200
+#define MAX_DEV 20 // max number of devices to stream/dump
+
 
 // ** Communication related constants **
 // i2c
@@ -30,8 +32,6 @@
 #define CMD_ESC 0x0E
 #define CMD_OK 0x0D
 
-
-#define MAX_DEV 20 // max number of devices to stream/dump
 #define STREAM_LENGTH 5 // i2cadd[1]+regadd[1]+len[1]+period[2]
 
 LWI2C lwi2c;
