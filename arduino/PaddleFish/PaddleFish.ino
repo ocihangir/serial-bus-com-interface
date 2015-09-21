@@ -553,7 +553,7 @@ void commError()
   // Error in UART communication
   receivedCmd = CMD_NULL;
   startReceive = false;
-  commOK(receivedCmd);
+  commNOK(receivedCmd);
 }
 
 void commOK(char command)
